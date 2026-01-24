@@ -5,9 +5,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface ConsumoFilamentoRepository extends JpaRepository<ConsumoFilamento, Long> {
-    List<ConsumoFilamento> findByProducao_Id(Long producaoId);
-    List<ConsumoFilamento> findByFilamento_Id(Long filamentoId);
+public interface ConsumoFilamentoRepository extends JpaRepository<ConsumoFilamento, UUID> {
+    List<ConsumoFilamento> findByProducao_Id(UUID producaoId);
+    List<ConsumoFilamento> findByFilamento_Id(UUID filamentoId);
 }

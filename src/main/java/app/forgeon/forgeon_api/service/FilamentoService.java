@@ -7,6 +7,7 @@ import app.forgeon.forgeon_api.repository.FilamentoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -18,7 +19,7 @@ public class FilamentoService {
         this.repository = repository;
     }
 
-    public List<FilamentoResponse> listarPorEmpresa(Long empresaId) {
+    public List<FilamentoResponse> listarPorEmpresa(UUID empresaId) {
         return repository.findByEmpresaId(empresaId).stream()
                 .map(f -> new FilamentoResponse(
                         f.getId(),
@@ -50,7 +51,7 @@ public class FilamentoService {
         return toResponse(f);
     }
 
-    public FilamentoResponse atualizar(Long id, FilamentoRequest dto) {
+    public FilamentoResponse atualizar(UUID id, FilamentoRequest dto) {
         Filamento f = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Filamento não encontrado"));
 
@@ -66,7 +67,7 @@ public class FilamentoService {
         return toResponse(f);
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         repository.deleteById(id);
     }
 

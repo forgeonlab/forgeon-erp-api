@@ -9,6 +9,7 @@ import app.forgeon.forgeon_api.repository.ManutencaoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,7 +23,7 @@ public class ManutencaoService {
         this.impressoraRepository = impressoraRepository;
     }
 
-    public List<ManutencaoResponse> listarPorEmpresa(Long empresaId) {
+    public List<ManutencaoResponse> listarPorEmpresa(UUID empresaId) {
         return repository.findByImpressora_EmpresaIdOrderByDataDesc(empresaId)
                 .stream()
                 .map(m -> new ManutencaoResponse(
@@ -58,7 +59,7 @@ public class ManutencaoService {
         );
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         repository.deleteById(id);
     }
 }

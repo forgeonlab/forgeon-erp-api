@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Entity
 @Table(
         name = "estoque_produtos",
@@ -14,11 +16,11 @@ import lombok.Setter;
 public class EstoqueProduto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "empresa_id", nullable = false)
-    private Long empresaId;
+    private UUID empresaId;
 
     @ManyToOne
     @JoinColumn(name = "produto_id", nullable = false)

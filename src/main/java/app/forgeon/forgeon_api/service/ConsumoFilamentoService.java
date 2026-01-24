@@ -11,6 +11,7 @@ import app.forgeon.forgeon_api.repository.ProducaoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,7 +29,7 @@ public class ConsumoFilamentoService {
         this.filamentoRepository = filamentoRepository;
     }
 
-    public List<ConsumoFilamentoResponse> listarPorProducao(Long producaoId) {
+    public List<ConsumoFilamentoResponse> listarPorProducao(UUID producaoId) {
         return repository.findByProducao_Id(producaoId)
                 .stream()
                 .map(c -> new ConsumoFilamentoResponse(
@@ -62,7 +63,7 @@ public class ConsumoFilamentoService {
         );
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         repository.deleteById(id);
     }
 }

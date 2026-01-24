@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface EstoqueProdutoRepository extends JpaRepository<EstoqueProduto, Long> {
-    List<EstoqueProduto> findByEmpresaId(Long empresaId);
-    Optional<EstoqueProduto> findByEmpresaIdAndProdutoId(Long empresaId, Long produtoId);
+public interface EstoqueProdutoRepository extends JpaRepository<EstoqueProduto, UUID> {
+    List<EstoqueProduto> findByEmpresaId(UUID empresaId);
+    Optional<EstoqueProduto> findByEmpresaIdAndProdutoId(UUID empresaId, UUID produtoId);
 }

@@ -7,12 +7,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class MovimentacaoEstoqueProdutoResponse {
-    private Long id;
+    private UUID id;
     private String produtoNome;
     private TipoMovimentacao tipo;
     private OrigemMovimentacao origem;

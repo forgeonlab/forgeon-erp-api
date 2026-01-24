@@ -9,9 +9,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface VendaRepository extends JpaRepository<Venda, Long> {
+public interface VendaRepository extends JpaRepository<Venda, UUID> {
     List<Venda> findByEmpresa(Empresa empresa);
     List<Venda> findByStatus(String status);
 
@@ -29,5 +30,5 @@ public interface VendaRepository extends JpaRepository<Venda, Long> {
         GROUP BY p.id, p.nome
         ORDER BY SUM(v.quantidade) DESC
     """)
-    List<ProdutoVendaDTO> vendasPorProduto(@Param("empresaId") Long empresaId);
+    List<ProdutoVendaDTO> vendasPorProduto(@Param("empresaId") UUID empresaId);
 }

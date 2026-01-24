@@ -12,6 +12,7 @@ import app.forgeon.forgeon_api.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +30,7 @@ public class ProducaoService {
         this.impressoraRepository = impressoraRepository;
     }
 
-    public List<ProducaoResponse> listarPorEmpresa(Long empresaId) {
+    public List<ProducaoResponse> listarPorEmpresa(UUID empresaId) {
         return repository.findByEmpresaIdOrderByDataDesc(empresaId)
                 .stream()
                 .map(this::toResponse)
@@ -58,7 +59,7 @@ public class ProducaoService {
         return toResponse(p);
     }
 
-    public ProducaoResponse atualizarStatus(Long id, StatusProducao novoStatus) {
+    public ProducaoResponse atualizarStatus(UUID id, StatusProducao novoStatus) {
         Producao p = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produção não encontrada"));
 
@@ -67,7 +68,7 @@ public class ProducaoService {
         return toResponse(p);
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         repository.deleteById(id);
     }
 

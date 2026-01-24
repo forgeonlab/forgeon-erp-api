@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class DashboardService {
@@ -17,7 +18,7 @@ public class DashboardService {
     @Autowired
     private LogService logService;
 
-    public Map<String, Object> getResumo(Long empresaId, Long usuarioId) {
+    public Map<String, Object> getResumo(UUID empresaId, UUID usuarioId) {
         Map<String, Object> data = new HashMap<>();
 
         // KPIs principais
@@ -42,7 +43,7 @@ public class DashboardService {
         data.put("impressoras", dashboardRepository.impressorasAtivas(empresaId));
         data.put("statusImpressoras", dashboardRepository.statusImpressoras(empresaId));
 
-        // Log automático
+//         Log automático
         LogRequest log = new LogRequest();
         log.setEmpresaId(empresaId);
         log.setUsuarioId(usuarioId);

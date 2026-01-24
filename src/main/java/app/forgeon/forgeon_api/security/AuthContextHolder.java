@@ -4,8 +4,11 @@ public class AuthContextHolder {
 
     private static final ThreadLocal<AuthContext> CONTEXT = new ThreadLocal<>();
 
-    public static void set(AuthContext auth) {
-        CONTEXT.set(auth);
+    private AuthContextHolder() {
+    }
+
+    public static void set(AuthContext authContext) {
+        CONTEXT.set(authContext);
     }
 
     public static AuthContext get() {

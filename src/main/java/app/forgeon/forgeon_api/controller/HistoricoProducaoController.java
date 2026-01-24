@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/historico-producao")
@@ -20,7 +21,7 @@ public class HistoricoProducaoController {
     }
 
     @GetMapping("/producao/{producaoId}")
-    public ResponseEntity<List<HistoricoProducaoResponse>> listarPorProducao(@PathVariable Long producaoId) {
+    public ResponseEntity<List<HistoricoProducaoResponse>> listarPorProducao(@PathVariable UUID producaoId) {
         return ResponseEntity.ok(service.listarPorProducao(producaoId));
     }
 

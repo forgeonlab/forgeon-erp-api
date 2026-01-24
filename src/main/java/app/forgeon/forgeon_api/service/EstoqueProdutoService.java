@@ -9,6 +9,7 @@ import app.forgeon.forgeon_api.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,7 +23,7 @@ public class EstoqueProdutoService {
         this.produtoRepo = produtoRepo;
     }
 
-    public List<EstoqueProdutoResponse> listarPorEmpresa(Long empresaId) {
+    public List<EstoqueProdutoResponse> listarPorEmpresa(UUID empresaId) {
         return estoqueRepo.findByEmpresaId(empresaId).stream()
                 .map(e -> new EstoqueProdutoResponse(
                         e.getId(),
@@ -54,7 +55,7 @@ public class EstoqueProdutoService {
         );
     }
 
-    public void ajustarQuantidade(Long empresaId, Long produtoId, Integer delta) {
+    public void ajustarQuantidade(UUID empresaId, UUID produtoId, Integer delta) {
         EstoqueProduto estoque = estoqueRepo.findByEmpresaIdAndProdutoId(empresaId, produtoId)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado no estoque"));
 
@@ -62,7 +63,7 @@ public class EstoqueProdutoService {
         estoqueRepo.save(estoque);
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         estoqueRepo.deleteById(id);
     }
 }

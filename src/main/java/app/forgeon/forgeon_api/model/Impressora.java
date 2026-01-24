@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "impressoras")
 @Getter
@@ -12,11 +14,11 @@ import lombok.Setter;
 public class Impressora {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "empresa_id", nullable = false)
-    private Long empresaId;
+    private UUID empresaId;
 
     @Column(nullable = false, length = 100)
     private String nome;

@@ -2,10 +2,12 @@ package app.forgeon.forgeon_api.dto.cliente;
 
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class ClienteDTO {
-    private Long id;
-    private Long empresaId;
+    private UUID id;
+    private UUID empresaId;
     private String nome;
     private String email;
     private String telefone;

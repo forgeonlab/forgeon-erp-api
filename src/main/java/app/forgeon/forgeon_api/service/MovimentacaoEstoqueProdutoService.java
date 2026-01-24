@@ -9,6 +9,7 @@ import app.forgeon.forgeon_api.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,7 +23,7 @@ public class MovimentacaoEstoqueProdutoService {
         this.produtoRepo = produtoRepo;
     }
 
-    public List<MovimentacaoEstoqueProdutoResponse> listarPorEmpresa(Long empresaId) {
+    public List<MovimentacaoEstoqueProdutoResponse> listarPorEmpresa(UUID empresaId) {
         return repo.findByEmpresaIdOrderByDataDesc(empresaId)
                 .stream()
                 .map(m -> new MovimentacaoEstoqueProdutoResponse(
@@ -60,7 +61,7 @@ public class MovimentacaoEstoqueProdutoService {
         );
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         repo.deleteById(id);
     }
 }

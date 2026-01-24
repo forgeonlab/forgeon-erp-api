@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "movimentacao_estoque_produto")
@@ -15,11 +16,11 @@ import java.time.LocalDateTime;
 public class MovimentacaoEstoqueProduto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @Column(name = "empresa_id", nullable = false)
-    private Long empresaId;
+    private UUID empresaId;
 
     @ManyToOne
     @JoinColumn(name = "produto_id", nullable = false)
@@ -37,7 +38,7 @@ public class MovimentacaoEstoqueProduto {
     private OrigemMovimentacao origem;
 
     @Column(name = "referencia_id")
-    private Long referenciaId;
+    private UUID referenciaId;
 
     @Column(nullable = false)
     private LocalDateTime data = LocalDateTime.now();

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "logs")
@@ -13,8 +14,8 @@ import java.time.LocalDateTime;
 public class Log {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     @ManyToOne
     @JoinColumn(name = "empresa_id", nullable = false)
@@ -28,7 +29,7 @@ public class Log {
     private String entidade;
 
     @Column(name = "entidade_id")
-    private Long entidadeId;
+    private UUID entidadeId;
 
     @Column(nullable = false)
     private String acao;

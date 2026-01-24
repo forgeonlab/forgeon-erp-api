@@ -8,6 +8,7 @@ import app.forgeon.forgeon_api.repository.ImpressoraRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,7 +20,7 @@ public class ImpressoraService {
         this.repository = repository;
     }
 
-    public List<ImpressoraResponse> listarPorEmpresa(Long empresaId) {
+    public List<ImpressoraResponse> listarPorEmpresa(UUID empresaId) {
         return repository.findByEmpresaId(empresaId).stream()
                 .map(i -> new ImpressoraResponse(
                         i.getId(),
@@ -43,7 +44,7 @@ public class ImpressoraService {
         return toResponse(i);
     }
 
-    public ImpressoraResponse atualizar(Long id, ImpressoraRequest dto) {
+    public ImpressoraResponse atualizar(UUID id, ImpressoraRequest dto) {
         Impressora i = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Impressora não encontrada"));
 
@@ -56,7 +57,7 @@ public class ImpressoraService {
         return toResponse(i);
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         repository.deleteById(id);
     }
 

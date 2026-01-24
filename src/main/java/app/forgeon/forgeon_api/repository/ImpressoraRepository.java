@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface ImpressoraRepository extends JpaRepository<Impressora, Long> {
-    List<Impressora> findByEmpresaId(Long empresaId);
+public interface ImpressoraRepository extends JpaRepository<Impressora, UUID> {
+    List<Impressora> findByEmpresaId(UUID empresaId);
 }

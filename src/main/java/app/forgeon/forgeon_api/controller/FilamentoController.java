@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/filamentos")
@@ -20,7 +21,7 @@ public class FilamentoController {
     }
 
     @GetMapping("/empresa/{empresaId}")
-    public ResponseEntity<List<FilamentoResponse>> listar(@PathVariable Long empresaId) {
+    public ResponseEntity<List<FilamentoResponse>> listar(@PathVariable UUID empresaId) {
         return ResponseEntity.ok(service.listarPorEmpresa(empresaId));
     }
 
@@ -30,12 +31,12 @@ public class FilamentoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<FilamentoResponse> atualizar(@PathVariable Long id, @RequestBody FilamentoRequest dto) {
+    public ResponseEntity<FilamentoResponse> atualizar(@PathVariable UUID id, @RequestBody FilamentoRequest dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         service.deletar(id);
         return ResponseEntity.noContent().build();
     }

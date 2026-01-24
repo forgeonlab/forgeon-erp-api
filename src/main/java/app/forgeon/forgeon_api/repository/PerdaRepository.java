@@ -5,8 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface PerdaRepository extends JpaRepository<Perda, Long> {
-    List<Perda> findByProducao_IdOrderByDataDesc(Long producaoId);
+public interface PerdaRepository extends JpaRepository<Perda, UUID> {
+    List<Perda> findByProducao_IdOrderByDataDesc(UUID producaoId);
 }

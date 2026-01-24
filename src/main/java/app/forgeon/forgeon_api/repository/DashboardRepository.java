@@ -8,33 +8,34 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Repository
-public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
+public interface DashboardRepository extends JpaRepository<Dashboard, UUID> {
 
     /* === DADOS GERAIS ======================================================= */
 
     @Query(value = """
         SELECT COUNT(*) FROM produtos WHERE empresa_id = :empresaId
     """, nativeQuery = true)
-    Long countProdutos(@Param("empresaId") Long empresaId);
+    Long countProdutos(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
         SELECT COUNT(*) FROM clientes WHERE empresa_id = :empresaId
     """, nativeQuery = true)
-    Long countClientes(@Param("empresaId") Long empresaId);
+    Long countClientes(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
         SELECT COUNT(*) FROM impressoras 
         WHERE empresa_id = :empresaId AND ativo = 1
     """, nativeQuery = true)
-    Long countImpressorasAtivas(@Param("empresaId") Long empresaId);
+    Long countImpressorasAtivas(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
         SELECT COUNT(*) FROM producoes 
         WHERE empresa_id = :empresaId AND status = 'EM_ANDAMENTO'
     """, nativeQuery = true)
-    Long countProducoesAtivas(@Param("empresaId") Long empresaId);
+    Long countProducoesAtivas(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
   SELECT DATE_FORMAT(MIN(data), '%b') AS mes,
@@ -46,7 +47,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
   GROUP BY YEAR(data), MONTH(data)
   ORDER BY YEAR(data), MONTH(data)
 """, nativeQuery = true)
-    List<Map<String, Object>> faturamentoMensal(@Param("empresaId") Long empresaId);
+    List<Map<String, Object>> faturamentoMensal(@Param("empresaId") UUID empresaId);
 
 
 
@@ -56,13 +57,13 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
         FROM vendas
         WHERE empresa_id = :empresaId AND status = 'CONCLUIDA'
     """, nativeQuery = true)
-    Double ticketMedio(@Param("empresaId") Long empresaId);
+    Double ticketMedio(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
         SELECT COUNT(*) FROM vendas
         WHERE empresa_id = :empresaId AND status = 'CONCLUIDA'
     """, nativeQuery = true)
-    Long totalVendasConcluidas(@Param("empresaId") Long empresaId);
+    Long totalVendasConcluidas(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
         SELECT COALESCE(SUM(peso_usado), 0)
@@ -70,7 +71,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
         JOIN producoes p ON p.id = cf.producao_id
         WHERE p.empresa_id = :empresaId
     """, nativeQuery = true)
-    Double consumoTotalFilamento(@Param("empresaId") Long empresaId);
+    Double consumoTotalFilamento(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
         SELECT COALESCE(SUM(peso_perdido), 0)
@@ -78,7 +79,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
         JOIN producoes p ON p.id = pe.producao_id
         WHERE p.empresa_id = :empresaId
     """, nativeQuery = true)
-    Double pesoPerdido(@Param("empresaId") Long empresaId);
+    Double pesoPerdido(@Param("empresaId") UUID empresaId);
 
     /* === GRÁFICOS ========================================================== */
 
@@ -90,7 +91,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
         GROUP BY DATE(data)
         ORDER BY dia ASC
     """, nativeQuery = true)
-    List<Map<String, Object>> producaoSemanal(@Param("empresaId") Long empresaId);
+    List<Map<String, Object>> producaoSemanal(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
         SELECT p.nome AS produto, SUM(v.quantidade) AS total
@@ -102,7 +103,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
         ORDER BY total DESC
         LIMIT 5
     """, nativeQuery = true)
-    List<Map<String, Object>> topProdutosVendidos(@Param("empresaId") Long empresaId);
+    List<Map<String, Object>> topProdutosVendidos(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
         SELECT material, SUM(peso_atual) as peso_restante
@@ -110,7 +111,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
         WHERE empresa_id = :empresaId AND ativo = 1
         GROUP BY material
     """, nativeQuery = true)
-    List<Map<String, Object>> estoqueFilamentos(@Param("empresaId") Long empresaId);
+    List<Map<String, Object>> estoqueFilamentos(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
         SELECT status, COUNT(*) as total
@@ -118,7 +119,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
         WHERE empresa_id = :empresaId
         GROUP BY status
     """, nativeQuery = true)
-    List<Map<String, Object>> statusImpressoras(@Param("empresaId") Long empresaId);
+    List<Map<String, Object>> statusImpressoras(@Param("empresaId") UUID empresaId);
 
     /* === EFICIÊNCIA E INDICADORES ========================================= */
 
@@ -130,7 +131,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
           AND status = 'FINALIZADA'
           AND quantidade_planejada > 0
     """, nativeQuery = true)
-    Double eficienciaMedia(@Param("empresaId") Long empresaId);
+    Double eficienciaMedia(@Param("empresaId") UUID empresaId);
 
     @Query(value = """
         SELECT COUNT(*) FROM manutencoes m
@@ -138,7 +139,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
         WHERE i.empresa_id = :empresaId
           AND DATE(m.data) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
     """, nativeQuery = true)
-    Long manutencoesRecentes(@Param("empresaId") Long empresaId);
+    Long manutencoesRecentes(@Param("empresaId") UUID empresaId);
 
     /* === OUTROS ============================================================ */
 
@@ -151,6 +152,6 @@ public interface DashboardRepository extends JpaRepository<Dashboard, Long> {
         WHERE i.empresa_id = :empresaId
           AND i.ativo = 1
     """, nativeQuery = true)
-    List<Map<String, Object>> impressorasAtivas(@Param("empresaId") Long empresaId);
+    List<Map<String, Object>> impressorasAtivas(@Param("empresaId") UUID empresaId);
 
 }

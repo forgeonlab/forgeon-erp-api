@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
@@ -31,7 +32,7 @@ public class EmpresaController {
 
     // ✅ Buscar empresa por ID
     @GetMapping("/{id}")
-    public ResponseEntity<EmpresaResponseDTO> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<EmpresaResponseDTO> buscarPorId(@PathVariable UUID id) {
         return empresaService.buscarPorId(id)
                 .map(empresa -> ResponseEntity.ok(toResponseDTO(empresa)))
                 .orElse(ResponseEntity.notFound().build());
@@ -48,7 +49,7 @@ public class EmpresaController {
 
     // ✅ Atualizar uma empresa
     @PutMapping("/{id}")
-    public ResponseEntity<EmpresaResponseDTO> atualizar(@PathVariable Long id,
+    public ResponseEntity<EmpresaResponseDTO> atualizar(@PathVariable UUID id,
                                                         @Valid @RequestBody EmpresaRequestDTO dto) {
         return empresaService.atualizar(id, toEntity(dto))
                 .map(atualizada -> ResponseEntity.ok(toResponseDTO(atualizada)))
@@ -57,7 +58,7 @@ public class EmpresaController {
 
     // ✅ Deletar
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         boolean removida = empresaService.deletar(id);
         return removida ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }

@@ -5,13 +5,14 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
 public class ProducaoRequest {
-    private Long empresaId;
-    private Long produtoId;
-    private Long impressoraId;
+    private UUID empresaId;
+    private UUID produtoId;
+    private UUID impressoraId;
     private Integer quantidadePlanejada;
     private Integer quantidadeBoa;
     private StatusProducao status;

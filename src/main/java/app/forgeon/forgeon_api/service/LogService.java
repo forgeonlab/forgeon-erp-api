@@ -11,6 +11,7 @@ import app.forgeon.forgeon_api.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,16 +21,23 @@ public class LogService {
     private final EmpresaRepository empresaRepository;
     private final UsuarioRepository usuarioRepository;
 
-    public LogService(LogRepository logRepository,
-                      EmpresaRepository empresaRepository,
-                      UsuarioRepository usuarioRepository) {
+    public LogService(
+            LogRepository logRepository,
+            EmpresaRepository empresaRepository,
+            UsuarioRepository usuarioRepository
+    ) {
         this.logRepository = logRepository;
         this.empresaRepository = empresaRepository;
         this.usuarioRepository = usuarioRepository;
     }
 
-    public List<LogResponse> listarPorEmpresa(Long empresaId) {
-        Empresa empresa = empresaRepository.findById(empresaId)
+    /* =========================
+       LISTAR LOGS POR EMPRESA
+       ========================= */
+    public List<LogResponse> listarPorEmpresa(UUID empresaPublicId) {
+
+        Empresa empresa = empresaRepository
+                .findByPublicId(empresaPublicId)
                 .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
 
         return logRepository.findByEmpresaOrderByDataDesc(empresa)
@@ -45,13 +53,19 @@ public class LogService {
                 .collect(Collectors.toList());
     }
 
+    /* =========================
+       REGISTRAR LOG
+       ========================= */
     public LogResponse registrar(LogRequest dto) {
-        Empresa empresa = empresaRepository.findById(dto.getEmpresaId())
+
+        Empresa empresa = empresaRepository
+                .findByPublicId(dto.getEmpresaId())
                 .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
 
         Usuario usuario = null;
         if (dto.getUsuarioId() != null) {
-            usuario = usuarioRepository.findById(dto.getUsuarioId())
+            usuario = usuarioRepository
+                    .findByPublicId(dto.getUsuarioId())
                     .orElse(null);
         }
 
@@ -74,7 +88,7 @@ public class LogService {
         );
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         logRepository.deleteById(id);
     }
 }

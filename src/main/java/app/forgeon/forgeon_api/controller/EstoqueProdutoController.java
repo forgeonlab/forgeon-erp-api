@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/estoque")
@@ -20,7 +21,7 @@ public class EstoqueProdutoController {
     }
 
     @GetMapping("/empresa/{empresaId}")
-    public ResponseEntity<List<EstoqueProdutoResponse>> listarPorEmpresa(@PathVariable Long empresaId) {
+    public ResponseEntity<List<EstoqueProdutoResponse>> listarPorEmpresa(@PathVariable UUID empresaId) {
         return ResponseEntity.ok(service.listarPorEmpresa(empresaId));
     }
 
@@ -31,8 +32,8 @@ public class EstoqueProdutoController {
 
     @PatchMapping("/ajustar")
     public ResponseEntity<Void> ajustarQuantidade(
-            @RequestParam Long empresaId,
-            @RequestParam Long produtoId,
+            @RequestParam UUID empresaId,
+            @RequestParam UUID produtoId,
             @RequestParam Integer delta
     ) {
         service.ajustarQuantidade(empresaId, produtoId, delta);
@@ -40,7 +41,7 @@ public class EstoqueProdutoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         service.deletar(id);
         return ResponseEntity.noContent().build();
     }

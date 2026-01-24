@@ -9,6 +9,7 @@ import app.forgeon.forgeon_api.repository.MovimentacaoFilamentoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,7 +23,7 @@ public class MovimentacaoFilamentoService {
         this.filamentoRepo = filamentoRepo;
     }
 
-    public List<MovimentacaoFilamentoResponse> listarPorEmpresa(Long empresaId) {
+    public List<MovimentacaoFilamentoResponse> listarPorEmpresa(UUID empresaId) {
         return repo.findByEmpresaIdOrderByDataDesc(empresaId)
                 .stream()
                 .map(m -> new MovimentacaoFilamentoResponse(
@@ -64,7 +65,7 @@ public class MovimentacaoFilamentoService {
         );
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         repo.deleteById(id);
     }
 }

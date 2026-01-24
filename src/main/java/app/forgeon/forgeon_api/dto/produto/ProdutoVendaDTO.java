@@ -4,12 +4,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
 public class ProdutoVendaDTO {
 
-    private Long produtoId;
+    private UUID produtoId;
     private String nome;
     private Long quantidadeVendida;
     private Double faturamento;

@@ -9,6 +9,7 @@ import app.forgeon.forgeon_api.repository.ProducaoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,7 +23,7 @@ public class PerdaService {
         this.producaoRepository = producaoRepository;
     }
 
-    public List<PerdaResponse> listarPorProducao(Long producaoId) {
+    public List<PerdaResponse> listarPorProducao(UUID producaoId) {
         return repository.findByProducao_IdOrderByDataDesc(producaoId)
                 .stream()
                 .map(p -> new PerdaResponse(
@@ -55,7 +56,7 @@ public class PerdaService {
         );
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         repository.deleteById(id);
     }
 }

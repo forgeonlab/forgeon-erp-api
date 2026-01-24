@@ -1,9 +1,10 @@
 package app.forgeon.forgeon_api.dto.empresa;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class EmpresaResponseDTO {
-    private Long id;
+    private UUID id;
     private String nome;
     private String cnpj;
     private String email;
@@ -12,7 +13,7 @@ public class EmpresaResponseDTO {
     private LocalDateTime dataCriacao;
 
     // Construtor prático
-    public EmpresaResponseDTO(Long id, String nome, String cnpj, String email, String telefone, Boolean ativa, LocalDateTime dataCriacao) {
+    public EmpresaResponseDTO(UUID id, String nome, String cnpj, String email, String telefone, Boolean ativa, LocalDateTime dataCriacao) {
         this.id = id;
         this.nome = nome;
         this.cnpj = cnpj;
@@ -23,7 +24,7 @@ public class EmpresaResponseDTO {
     }
 
     // Getters
-    public Long getId() { return id; }
+    public UUID getId() { return id; }
     public String getNome() { return nome; }
     public String getCnpj() { return cnpj; }
     public String getEmail() { return email; }

@@ -3,12 +3,14 @@ package app.forgeon.forgeon_api.dto.log;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 public class LogRequest {
-    private Long empresaId;
-    private Long usuarioId;
+    private UUID empresaId;
+    private UUID usuarioId;
     private String entidade;
-    private Long entidadeId;
+    private UUID entidadeId;
     private String acao;
 }

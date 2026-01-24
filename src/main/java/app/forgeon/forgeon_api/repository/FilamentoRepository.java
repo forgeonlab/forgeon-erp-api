@@ -6,9 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface FilamentoRepository extends JpaRepository<Filamento, Long> {
-    List<Filamento> findByEmpresaId(Long empresaId);
-    Optional<Filamento> findByEmpresaIdAndSku(Long empresaId, String sku);
+public interface FilamentoRepository extends JpaRepository<Filamento, UUID> {
+    List<Filamento> findByEmpresaId(UUID empresaId);
+    Optional<Filamento> findByEmpresaIdAndSku(UUID empresaId, String sku);
 }

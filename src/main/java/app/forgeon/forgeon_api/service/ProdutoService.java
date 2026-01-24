@@ -9,6 +9,7 @@ import app.forgeon.forgeon_api.repository.VendaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class ProdutoService {
@@ -24,7 +25,7 @@ public class ProdutoService {
         this.vendaRepository = vendaRepository;
     }
 
-    public List<ProdutoResponse> listarPorEmpresa(Long empresaId) {
+    public List<ProdutoResponse> listarPorEmpresa(UUID empresaId) {
         return produtoRepository.findByEmpresaId(empresaId)
                 .stream()
                 .map(p -> new ProdutoResponse(
@@ -56,7 +57,7 @@ public class ProdutoService {
         );
     }
 
-    public ProdutoResponse atualizar(Long id, ProdutoRequest dto) {
+    public ProdutoResponse atualizar(UUID id, ProdutoRequest dto) {
         Produto produto = produtoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
@@ -75,12 +76,12 @@ public class ProdutoService {
         );
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         produtoRepository.deleteById(id);
     }
 
     // 📊 MÉTRICA / GRÁFICO
-    public List<ProdutoVendaDTO> vendasPorProduto(Long empresaId) {
+    public List<ProdutoVendaDTO> vendasPorProduto(UUID empresaId) {
         return vendaRepository.vendasPorProduto(empresaId);
     }
 }

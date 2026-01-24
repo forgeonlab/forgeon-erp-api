@@ -8,40 +8,43 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.validator.constraints.br.CNPJ;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
-@Table(
-        name = "empresas",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_empresa_cnpj", columnNames = "cnpj")
-        }
-)
+@Table(name = "empresas")
 @Getter
 @Setter
 public class Empresa {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-    @Column(nullable = false, length = 120)
+    @Column(name = "public_id", nullable = false, unique = true, updatable = false)
+    private UUID publicId;
+
+    @Column(nullable = false)
     private String nome;
 
-    @CNPJ
-    @Column(nullable = false, length = 14)
+    @Column(nullable = false, unique = true)
     private String cnpj;
 
-    @Email
-    @Column(nullable = false, length = 120)
+    @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false, length = 20)
     private String telefone;
 
     @Column(nullable = false)
-    private boolean ativa = true;
+    private Boolean ativa = true;
 
     @CreationTimestamp
-    @Column(name = "data_criacao", nullable = false, updatable = false)
+    @Column(name = "data_criacao", updatable = false)
     private LocalDateTime dataCriacao;
+
+    @PrePersist
+    public void gerarPublicId() {
+        if (this.publicId == null) {
+            this.publicId = UUID.randomUUID();
+        }
+    }
 }

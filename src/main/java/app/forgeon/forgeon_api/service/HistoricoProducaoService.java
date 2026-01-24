@@ -9,6 +9,7 @@ import app.forgeon.forgeon_api.repository.ProducaoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,7 +23,7 @@ public class HistoricoProducaoService {
         this.producaoRepository = producaoRepository;
     }
 
-    public List<HistoricoProducaoResponse> listarPorProducao(Long producaoId) {
+    public List<HistoricoProducaoResponse> listarPorProducao(UUID producaoId) {
         return repository.findByProducao_IdOrderByDataAsc(producaoId)
                 .stream()
                 .map(h -> new HistoricoProducaoResponse(

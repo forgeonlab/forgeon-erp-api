@@ -14,6 +14,7 @@ import app.forgeon.forgeon_api.repository.VendaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +35,7 @@ public class VendaService {
         this.clienteRepository = clienteRepository;
     }
 
-    public List<VendaResponse> listarPorEmpresa(Long empresaId) {
+    public List<VendaResponse> listarPorEmpresa(UUID empresaId) {
         Empresa empresa = empresaRepository.findById(empresaId)
                 .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
 
@@ -84,7 +85,7 @@ public class VendaService {
         );
     }
 
-    public VendaResponse atualizarStatus(Long id, StatusVenda novoStatus) {
+    public VendaResponse atualizarStatus(UUID id, StatusVenda novoStatus) {
         Venda venda = vendaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Venda não encontrada"));
         venda.setStatus(novoStatus);
@@ -101,7 +102,7 @@ public class VendaService {
         );
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         vendaRepository.deleteById(id);
     }
 }

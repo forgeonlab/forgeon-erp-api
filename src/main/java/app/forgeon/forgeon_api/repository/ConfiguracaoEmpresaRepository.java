@@ -6,13 +6,14 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface ConfiguracaoEmpresaRepository extends JpaRepository<ConfiguracaoEmpresa, Long> {
+public interface ConfiguracaoEmpresaRepository extends JpaRepository<ConfiguracaoEmpresa, UUID> {
 
-    List<ConfiguracaoEmpresa> findByEmpresaId(Long empresaId);
+    List<ConfiguracaoEmpresa> findByEmpresaId(UUID empresaId);
 
-    Optional<ConfiguracaoEmpresa> findByEmpresaIdAndChave(Long empresaId, String chave);
+    Optional<ConfiguracaoEmpresa> findByEmpresaIdAndChave(UUID empresaId, String chave);
 
-    boolean existsByEmpresaIdAndChave(Long empresaId, String chave);
+    boolean existsByEmpresaIdAndChave(UUID empresaId, String chave);
 }

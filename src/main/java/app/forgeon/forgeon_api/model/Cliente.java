@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "clientes")
 @Getter
@@ -11,8 +13,8 @@ import lombok.Setter;
 public class Cliente {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
     // 🔗 relacionamento N:1 — cada cliente pertence a uma empresa
     @ManyToOne(fetch = FetchType.LAZY)

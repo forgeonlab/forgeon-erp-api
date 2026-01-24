@@ -2,14 +2,15 @@ package app.forgeon.forgeon_api.repository;
 
 import app.forgeon.forgeon_api.model.Empresa;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
-public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
+import java.util.Optional;
+import java.util.UUID;
 
-    // 🔍 Exemplo de consulta personalizada:
-    Empresa findByCnpj(String cnpj);
+public interface EmpresaRepository extends JpaRepository<Empresa, UUID> {
 
-    // Ou para buscar apenas empresas ativas:
-    java.util.List<Empresa> findByAtivaTrue();
+    Optional<Empresa> findByPublicId(UUID publicId);
+
+    boolean existsByCnpj(String cnpj);
+
+    boolean existsByEmail(String email);
 }

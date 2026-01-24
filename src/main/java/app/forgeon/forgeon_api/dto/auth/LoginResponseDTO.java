@@ -1,4 +1,5 @@
 package app.forgeon.forgeon_api.dto.auth;
 
-public class LoginResponseDTO {
-}
+public record LoginResponseDTO(
+        String token
+) {}

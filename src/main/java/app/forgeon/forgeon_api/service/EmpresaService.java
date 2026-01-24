@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class EmpresaService {
@@ -20,7 +21,7 @@ public class EmpresaService {
     }
 
     // ✅ Buscar uma empresa por ID
-    public Optional<Empresa> buscarPorId(Long id) {
+    public Optional<Empresa> buscarPorId(UUID id) {
         return empresaRepository.findById(id);
     }
 
@@ -30,7 +31,7 @@ public class EmpresaService {
     }
 
     // ✅ Atualizar (aproveitando o método acima)
-    public Optional<Empresa> atualizar(Long id, Empresa empresaAtualizada) {
+    public Optional<Empresa> atualizar(UUID id, Empresa empresaAtualizada) {
         return empresaRepository.findById(id).map(existente -> {
             existente.setNome(empresaAtualizada.getNome());
             existente.setCnpj(empresaAtualizada.getCnpj());
@@ -42,7 +43,7 @@ public class EmpresaService {
     }
 
     // ✅ Deletar
-    public boolean deletar(Long id) {
+    public boolean deletar(UUID id) {
         if (empresaRepository.existsById(id)) {
             empresaRepository.deleteById(id);
             return true;

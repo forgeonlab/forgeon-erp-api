@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,14 +22,14 @@ public class ClienteService {
     @Autowired
     private EmpresaRepository empresaRepository;
 
-    public List<ClienteDTO> listarPorEmpresa(Long empresaId) {
+    public List<ClienteDTO> listarPorEmpresa(UUID empresaId) {
         return clienteRepository.findByEmpresaId(empresaId)
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public ClienteDTO buscarPorId(Long id) {
+    public ClienteDTO buscarPorId(UUID id) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
         return toDTO(cliente);
@@ -48,7 +49,7 @@ public class ClienteService {
         return toDTO(clienteRepository.save(cliente));
     }
 
-    public ClienteDTO atualizar(Long id, ClienteCreateDTO dto) {
+    public ClienteDTO atualizar(UUID id, ClienteCreateDTO dto) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
 
@@ -59,11 +60,11 @@ public class ClienteService {
         return toDTO(clienteRepository.save(cliente));
     }
 
-    public void deletar(Long id) {
+    public void deletar(UUID id) {
         clienteRepository.deleteById(id);
     }
 
-    public void alterarStatus(Long id, Boolean ativo) {
+    public void alterarStatus(UUID id, Boolean ativo) {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
         cliente.setAtivo(ativo);

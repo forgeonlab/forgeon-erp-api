@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/consumo-filamento")
@@ -20,7 +21,7 @@ public class ConsumoFilamentoController {
     }
 
     @GetMapping("/producao/{producaoId}")
-    public ResponseEntity<List<ConsumoFilamentoResponse>> listarPorProducao(@PathVariable Long producaoId) {
+    public ResponseEntity<List<ConsumoFilamentoResponse>> listarPorProducao(@PathVariable UUID producaoId) {
         return ResponseEntity.ok(service.listarPorProducao(producaoId));
     }
 
@@ -30,7 +31,7 @@ public class ConsumoFilamentoController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         service.deletar(id);
         return ResponseEntity.noContent().build();
     }

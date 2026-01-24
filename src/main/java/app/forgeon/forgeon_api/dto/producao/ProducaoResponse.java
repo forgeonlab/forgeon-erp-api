@@ -6,12 +6,13 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class ProducaoResponse {
-    private Long id;
+    private UUID id;
     private String produtoNome;
     private String impressoraNome;
     private Integer quantidadePlanejada;

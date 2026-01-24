@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/logs")
@@ -20,7 +21,7 @@ public class LogController {
     }
 
     @GetMapping("/empresa/{empresaId}")
-    public ResponseEntity<List<LogResponse>> listarPorEmpresa(@PathVariable Long empresaId) {
+    public ResponseEntity<List<LogResponse>> listarPorEmpresa(@PathVariable UUID empresaId) {
         return ResponseEntity.ok(service.listarPorEmpresa(empresaId));
     }
 
@@ -29,9 +30,9 @@ public class LogController {
         return ResponseEntity.ok(service.registrar(dto));
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        service.deletar(id);
-        return ResponseEntity.noContent().build();
-    }
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
+//        service.deletar(id);
+//        return ResponseEntity.noContent().build();
+//    }
 }

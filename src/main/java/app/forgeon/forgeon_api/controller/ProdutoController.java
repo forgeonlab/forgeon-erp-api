@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/produtos")
@@ -26,7 +27,7 @@ public class ProdutoController {
     }
 
     @GetMapping("/empresa/{empresaId}")
-    public ResponseEntity<List<ProdutoResponse>> listar(@PathVariable Long empresaId) {
+    public ResponseEntity<List<ProdutoResponse>> listar(@PathVariable UUID empresaId) {
         return ResponseEntity.ok(service.listarPorEmpresa(empresaId));
     }
 
@@ -36,18 +37,18 @@ public class ProdutoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProdutoResponse> atualizar(@PathVariable Long id, @RequestBody ProdutoRequest dto) {
+    public ResponseEntity<ProdutoResponse> atualizar(@PathVariable UUID id, @RequestBody ProdutoRequest dto) {
         return ResponseEntity.ok(service.atualizar(id, dto));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
         service.deletar(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/empresa/{empresaId}/vendas")
-    public List<ProdutoVendaDTO> teste(@PathVariable Long empresaId) {
+    public List<ProdutoVendaDTO> teste(@PathVariable UUID empresaId) {
         return vendaRepository.vendasPorProduto(empresaId);
     }
 
