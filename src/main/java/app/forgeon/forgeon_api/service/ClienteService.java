@@ -2,83 +2,45 @@ package app.forgeon.forgeon_api.service;
 
 import app.forgeon.forgeon_api.dto.cliente.ClienteCreateDTO;
 import app.forgeon.forgeon_api.dto.cliente.ClienteDTO;
-import app.forgeon.forgeon_api.model.Cliente;
-import app.forgeon.forgeon_api.model.Empresa;
-import app.forgeon.forgeon_api.repository.ClienteRepository;
-import app.forgeon.forgeon_api.repository.EmpresaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import app.forgeon.forgeon_api.dto.cliente.ClienteEstatisticasDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-@Service
-public class ClienteService {
+public interface ClienteService {
 
-    @Autowired
-    private ClienteRepository clienteRepository;
+    Page<ClienteDTO> listar(
+            Boolean ativo,
+            String search,
+            Pageable pageable,
+            UUID empresaPublicId
+    );
 
-    @Autowired
-    private EmpresaRepository empresaRepository;
+    ClienteDTO buscarPorId(
+            UUID id,
+            UUID empresaPublicId
+    );
 
-    public List<ClienteDTO> listarPorEmpresa(UUID empresaId) {
-        return clienteRepository.findByEmpresaId(empresaId)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
+    ClienteDTO criar(
+            ClienteCreateDTO dto,
+            UUID empresaPublicId,
+            UUID usuarioPublicId
+    );
 
-    public ClienteDTO buscarPorId(UUID id) {
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
-        return toDTO(cliente);
-    }
+    ClienteDTO atualizar(
+            UUID id,
+            ClienteCreateDTO dto,
+            UUID empresaPublicId
+    );
 
-    public ClienteDTO criar(ClienteCreateDTO dto) {
-        Empresa empresa = empresaRepository.findById(dto.getEmpresaId())
-                .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
+    void alterarStatus(
+            UUID id,
+            Boolean ativo,
+            UUID empresaPublicId
+    );
 
-        Cliente cliente = new Cliente();
-        cliente.setEmpresa(empresa);
-        cliente.setNome(dto.getNome());
-        cliente.setEmail(dto.getEmail());
-        cliente.setTelefone(dto.getTelefone());
-        cliente.setAtivo(true);
-
-        return toDTO(clienteRepository.save(cliente));
-    }
-
-    public ClienteDTO atualizar(UUID id, ClienteCreateDTO dto) {
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
-
-        cliente.setNome(dto.getNome());
-        cliente.setEmail(dto.getEmail());
-        cliente.setTelefone(dto.getTelefone());
-
-        return toDTO(clienteRepository.save(cliente));
-    }
-
-    public void deletar(UUID id) {
-        clienteRepository.deleteById(id);
-    }
-
-    public void alterarStatus(UUID id, Boolean ativo) {
-        Cliente cliente = clienteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
-        cliente.setAtivo(ativo);
-        clienteRepository.save(cliente);
-    }
-
-    private ClienteDTO toDTO(Cliente cliente) {
-        ClienteDTO dto = new ClienteDTO();
-        dto.setId(cliente.getId());
-        dto.setEmpresaId(cliente.getEmpresa().getId());
-        dto.setNome(cliente.getNome());
-        dto.setEmail(cliente.getEmail());
-        dto.setTelefone(cliente.getTelefone());
-        dto.setAtivo(cliente.getAtivo());
-        return dto;
-    }
+    ClienteEstatisticasDTO estatisticas(
+            UUID empresaPublicId
+    );
 }

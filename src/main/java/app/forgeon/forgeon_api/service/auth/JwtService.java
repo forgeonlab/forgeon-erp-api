@@ -1,5 +1,6 @@
 package app.forgeon.forgeon_api.service.auth;
 
+import app.forgeon.forgeon_api.model.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -19,35 +20,49 @@ public class JwtService {
     @Value("${security.jwt.secret}")
     private String secret;
 
-    @Value("${security.jwt.expiration}")
-    private long expirationMillis;
+    @Value("${security.jwt.access-expiration}")
+    private long accessExpirationMillis;
+
+    @Value("${security.jwt.refresh-expiration}")
+    private long refreshExpirationMillis;
 
     private Key signingKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     /* =========================
-       GERA TOKEN
+       ACCESS TOKEN
     ========================= */
-    public String gerarToken(
-            UUID userPublicId,
-            UUID empresaPublicId,
-            String role
-    ) {
+    public String gerarAccessToken(Usuario usuario) {
         return Jwts.builder()
-                .setSubject(userPublicId.toString())
-                .claim("empresa", empresaPublicId.toString())
-                .claim("role", role)
+                .setSubject(usuario.getPublicId().toString())
+                .claim("empresa", usuario.getEmpresa().getPublicId().toString())
+//                .claim("role", usuario.getRole().name())
                 .setIssuedAt(new Date())
                 .setExpiration(
-                        new Date(System.currentTimeMillis() + expirationMillis)
+                        new Date(System.currentTimeMillis() + accessExpirationMillis)
                 )
                 .signWith(signingKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     /* =========================
-       VALIDA E DEVOLVE CLAIMS  ✅ (ISSO FALTAVA)
+       REFRESH TOKEN
+       (menos claims, mais longo)
+    ========================= */
+    public String gerarRefreshToken(Usuario usuario) {
+        return Jwts.builder()
+                .setSubject(usuario.getPublicId().toString())
+                .setIssuedAt(new Date())
+                .setExpiration(
+                        new Date(System.currentTimeMillis() + refreshExpirationMillis)
+                )
+                .signWith(signingKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /* =========================
+       VALIDA TOKEN
     ========================= */
     public Claims validarToken(String token) {
         return Jwts.parserBuilder()
@@ -58,7 +73,7 @@ public class JwtService {
     }
 
     /* =========================
-       HELPERS (opcional)
+       HELPERS
     ========================= */
     public boolean isValid(String token) {
         try {
@@ -81,5 +96,12 @@ public class JwtService {
 
     public String extractRole(String token) {
         return validarToken(token).get("role", String.class);
+    }
+
+    /* =========================
+       EXPIRAÇÃO (FRONTEND)
+    ========================= */
+    public long getAccessTokenExpiration() {
+        return accessExpirationMillis / 1000; // em segundos
     }
 }

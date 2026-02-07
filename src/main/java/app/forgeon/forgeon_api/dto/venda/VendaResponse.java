@@ -1,22 +1,36 @@
 package app.forgeon.forgeon_api.dto.venda;
 
 import app.forgeon.forgeon_api.enums.StatusVenda;
+import app.forgeon.forgeon_api.model.Venda;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class VendaResponse {
+
     private UUID id;
-    private String cliente;
-    private String produto;
+    private UUID produtoPublicId;
+    private String produtoNome;
     private Integer quantidade;
-    private Double valorTotal;
+    private BigDecimal precoUnitario;
+    private BigDecimal total;
     private StatusVenda status;
-    private LocalDateTime data;
+
+    public static VendaResponse fromEntity(Venda venda) {
+        return new VendaResponse(
+                venda.getPublicId(),
+                venda.getProdutoPublicId(),
+                venda.getProdutoNome(),
+                venda.getQuantidade(),
+                venda.getPrecoUnitario(),
+                venda.getTotal(),
+                venda.getStatus()
+        );
+    }
 }

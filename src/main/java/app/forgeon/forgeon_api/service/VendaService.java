@@ -3,106 +3,144 @@ package app.forgeon.forgeon_api.service;
 import app.forgeon.forgeon_api.dto.venda.VendaRequest;
 import app.forgeon.forgeon_api.dto.venda.VendaResponse;
 import app.forgeon.forgeon_api.enums.StatusVenda;
-import app.forgeon.forgeon_api.model.Cliente;
-import app.forgeon.forgeon_api.model.Empresa;
 import app.forgeon.forgeon_api.model.Produto;
 import app.forgeon.forgeon_api.model.Venda;
-import app.forgeon.forgeon_api.repository.ClienteRepository;
-import app.forgeon.forgeon_api.repository.EmpresaRepository;
 import app.forgeon.forgeon_api.repository.ProdutoRepository;
 import app.forgeon.forgeon_api.repository.VendaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class VendaService {
 
     private final VendaRepository vendaRepository;
-    private final EmpresaRepository empresaRepository;
     private final ProdutoRepository produtoRepository;
-    private final ClienteRepository clienteRepository;
 
-    public VendaService(VendaRepository vendaRepository,
-                        EmpresaRepository empresaRepository,
-                        ProdutoRepository produtoRepository,
-                        ClienteRepository clienteRepository) {
+    public VendaService(
+            VendaRepository vendaRepository,
+            ProdutoRepository produtoRepository
+    ) {
         this.vendaRepository = vendaRepository;
-        this.empresaRepository = empresaRepository;
         this.produtoRepository = produtoRepository;
-        this.clienteRepository = clienteRepository;
     }
 
-    public List<VendaResponse> listarPorEmpresa(UUID empresaId) {
-        Empresa empresa = empresaRepository.findById(empresaId)
-                .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
+    /* =========================
+       LISTAR VENDAS
+    ========================= */
+    @Transactional(readOnly = true)
+    public List<VendaResponse> listarPorEmpresa(UUID empresaPublicId) {
 
-        return vendaRepository.findByEmpresa(empresa)
+        return vendaRepository
+                .findByEmpresaPublicIdAndAtivoTrue(empresaPublicId)
                 .stream()
-                .map(v -> new VendaResponse(
-                        v.getId(),
-                        v.getCliente().getNome(),
-                        v.getProduto().getNome(),
-                        v.getQuantidade(),
-                        v.getValorTotal(),
-                        v.getStatus(),
-                        v.getData()
-                ))
-                .collect(Collectors.toList());
+                .map(VendaResponse::fromEntity)
+                .toList();
     }
 
-    public VendaResponse criar(VendaRequest dto) {
-        Empresa empresa = empresaRepository.findById(dto.getEmpresaId())
-                .orElseThrow(() -> new RuntimeException("Empresa não encontrada"));
+    /* =========================
+       CRIAR VENDA
+    ========================= */
+    @Transactional
+    public VendaResponse criar(
+            VendaRequest dto,
+            UUID empresaPublicId,
+            UUID usuarioPublicId
+    ) {
 
-        Produto produto = produtoRepository.findById(dto.getProdutoId())
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-
-        Cliente cliente = clienteRepository.findById(dto.getClienteId())
-                .orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
+        // 🔒 busca produto da mesma empresa
+        Produto produto = produtoRepository
+                .findByPublicIdAndEmpresaPublicIdAndAtivoTrue(
+                        dto.getProdutoPublicId(),
+                        empresaPublicId
+                )
+                .orElseThrow(() ->
+                        new RuntimeException("Produto não encontrado")
+                );
 
         Venda venda = new Venda();
-        venda.setEmpresa(empresa);
-        venda.setProduto(produto);
-        venda.setCliente(cliente);
+        venda.setPublicId(UUID.randomUUID());
+        venda.setEmpresaPublicId(empresaPublicId);
+
+        venda.setProdutoPublicId(produto.getPublicId());
+        venda.setProdutoNome(produto.getNome());
         venda.setQuantidade(dto.getQuantidade());
-        venda.setPrecoUnitario(dto.getPrecoUnitario());
-        venda.setValorTotal(dto.getPrecoUnitario() * dto.getQuantidade());
-        venda.setStatus(dto.getStatus() != null ? dto.getStatus() : StatusVenda.PENDENTE);
 
-        vendaRepository.save(venda);
+        BigDecimal quantidade = BigDecimal.valueOf(dto.getQuantidade());
+        BigDecimal precoUnitario = produto.getPrecoVenda();
+        BigDecimal total = precoUnitario.multiply(quantidade);
 
-        return new VendaResponse(
-                venda.getId(),
-                cliente.getNome(),
-                produto.getNome(),
-                venda.getQuantidade(),
-                venda.getValorTotal(),
-                venda.getStatus(),
-                venda.getData()
-        );
+        venda.setPrecoUnitario(precoUnitario);
+        venda.setTotal(total);
+
+        venda.setStatus(StatusVenda.CONCLUIDA);
+        venda.setAtivo(true);
+
+        venda.setCriadoEm(LocalDateTime.now());
+        venda.setCriadoPor(usuarioPublicId);
+
+        Venda salva = vendaRepository.save(venda);
+
+        return VendaResponse.fromEntity(salva);
     }
 
-    public VendaResponse atualizarStatus(UUID id, StatusVenda novoStatus) {
-        Venda venda = vendaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Venda não encontrada"));
-        venda.setStatus(novoStatus);
-        vendaRepository.save(venda);
+    /* =========================
+       ATUALIZAR STATUS
+    ========================= */
+    @Transactional
+    public VendaResponse atualizarStatus(
+            UUID vendaPublicId,
+            StatusVenda status,
+            UUID empresaPublicId
+    ) {
 
-        return new VendaResponse(
-                venda.getId(),
-                venda.getCliente().getNome(),
-                venda.getProduto().getNome(),
-                venda.getQuantidade(),
-                venda.getValorTotal(),
-                venda.getStatus(),
-                venda.getData()
-        );
+        Venda venda = vendaRepository
+                .findByPublicIdAndEmpresaPublicIdAndAtivoTrue(
+                        vendaPublicId,
+                        empresaPublicId
+                )
+                .orElseThrow(() ->
+                        new RuntimeException("Venda não encontrada")
+                );
+
+        venda.setStatus(status);
+        venda.setAtualizadoEm(LocalDateTime.now());
+
+        Venda atualizada = vendaRepository.save(venda);
+
+        return VendaResponse.fromEntity(atualizada);
     }
 
-    public void deletar(UUID id) {
-        vendaRepository.deleteById(id);
+    /* =========================
+       DELETAR VENDA (SOFT DELETE)
+    ========================= */
+    @Transactional
+    public void deletar(
+            UUID vendaPublicId,
+            UUID empresaPublicId
+    ) {
+
+        Venda venda = vendaRepository
+                .findByPublicIdAndEmpresaPublicIdAndAtivoTrue(
+                        vendaPublicId,
+                        empresaPublicId
+                )
+                .orElseThrow(() ->
+                        new RuntimeException("Venda não encontrada")
+                );
+
+        // regra de negócio opcional
+        if (venda.getStatus() == StatusVenda.CONCLUIDA) {
+            throw new RuntimeException("Não é possível excluir venda concluída");
+        }
+
+        venda.setAtivo(false);
+        venda.setAtualizadoEm(LocalDateTime.now());
+
+        vendaRepository.save(venda);
     }
 }

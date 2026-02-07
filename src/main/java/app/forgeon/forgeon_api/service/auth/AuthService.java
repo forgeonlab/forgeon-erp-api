@@ -1,44 +1,74 @@
 package app.forgeon.forgeon_api.service.auth;
 
+import app.forgeon.forgeon_api.dto.auth.LoginResponseDTO;
 import app.forgeon.forgeon_api.model.Usuario;
+import app.forgeon.forgeon_api.model.auth.RefreshToken;
 import app.forgeon.forgeon_api.repository.UsuarioRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import app.forgeon.forgeon_api.repository.auth.RefreshTokenRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
 
-    private final UsuarioRepository usuarioRepository;
     private final JwtService jwtService;
-    private final PasswordEncoder passwordEncoder;
+    private final UsuarioRepository usuarioRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     public AuthService(
-            UsuarioRepository usuarioRepository,
             JwtService jwtService,
-            PasswordEncoder passwordEncoder
+            UsuarioRepository usuarioRepository,
+            RefreshTokenRepository refreshTokenRepository
     ) {
-        this.usuarioRepository = usuarioRepository;
         this.jwtService = jwtService;
-        this.passwordEncoder = passwordEncoder;
+        this.usuarioRepository = usuarioRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
     }
+    @Transactional
+    public LoginResponseDTO login(String email, String senha) {
 
-    public String login(String email, String senha) {
-
-        Usuario usuario = usuarioRepository.findByEmail(email)
+        Usuario usuario = usuarioRepository
+                .findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Credenciais inválidas"));
 
-        if (!usuario.isAtivo()) {
-            throw new RuntimeException("Usuário inativo");
-        }
+        // validar senha...
 
-        if (!passwordEncoder.matches(senha, usuario.getSenha())) {
-            throw new RuntimeException("Credenciais inválidas");
-        }
+        String accessToken = jwtService.gerarAccessToken(usuario);
+        String refreshToken = jwtService.gerarRefreshToken(usuario);
 
-        return jwtService.gerarToken(
-                usuario.getPublicId(),
-                usuario.getEmpresa().getPublicId(),
-                usuario.getPapel().name()
+        refreshTokenRepository.deleteByUsuarioId(usuario.getId());
+
+        refreshTokenRepository.save(
+                new RefreshToken(usuario, refreshToken)
+        );
+
+        return new LoginResponseDTO(
+                accessToken,
+                refreshToken,
+                jwtService.getAccessTokenExpiration()
         );
     }
+
+    @Transactional
+    public LoginResponseDTO refresh(String refreshToken) {
+
+        RefreshToken token = refreshTokenRepository
+                .findByToken(refreshToken)
+                .orElseThrow(() -> new RuntimeException("Refresh token inválido"));
+
+        Usuario usuario = token.getUsuario();
+
+        String newAccessToken = jwtService.gerarAccessToken(usuario);
+        String newRefreshToken = jwtService.gerarRefreshToken(usuario);
+
+        token.setToken(newRefreshToken);
+        refreshTokenRepository.save(token);
+
+        return new LoginResponseDTO(
+                newAccessToken,
+                newRefreshToken,
+                jwtService.getAccessTokenExpiration()
+        );
+    }
+
 }

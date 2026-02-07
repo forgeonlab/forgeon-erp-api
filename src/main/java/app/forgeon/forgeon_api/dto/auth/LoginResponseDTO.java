@@ -1,5 +1,7 @@
 package app.forgeon.forgeon_api.dto.auth;
 
 public record LoginResponseDTO(
-        String token
+        String accessToken,
+        String refreshToken,
+        long expiresIn
 ) {}

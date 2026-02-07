@@ -81,12 +81,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             AuthContextHolder.set(authContext);
 
             // 🔥 AUTENTICAÇÃO DO SPRING (ISSO FALTAVA)
+            JwtUserDetails userDetails = new JwtUserDetails();
+            userDetails.setUserId(usuarioPublicId);
+            userDetails.setEmpresaId(empresaPublicId);
+// se não tiver email no token, pode remover
+// userDetails.setEmail(claims.get("email", String.class));
+
             UsernamePasswordAuthenticationToken authentication =
                     new UsernamePasswordAuthenticationToken(
-                            usuarioPublicId, // principal
+                            userDetails, // ⭐ PRINCIPAL CORRETO
                             null,
                             List.of(new SimpleGrantedAuthority("ROLE_" + role))
                     );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 

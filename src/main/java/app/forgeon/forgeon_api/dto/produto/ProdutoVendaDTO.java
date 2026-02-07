@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Getter
@@ -14,6 +15,5 @@ public class ProdutoVendaDTO {
     private UUID produtoId;
     private String nome;
     private Long quantidadeVendida;
-    private Double faturamento;
-
+    private BigDecimal faturamento; // ✅ TEM que ser BigDecimal
 }

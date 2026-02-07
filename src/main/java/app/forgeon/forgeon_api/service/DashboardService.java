@@ -1,57 +1,65 @@
 package app.forgeon.forgeon_api.service;
 
-import app.forgeon.forgeon_api.dto.log.LogRequest;
+import app.forgeon.forgeon_api.dto.dashboard.DashboardResumoDTO;
 import app.forgeon.forgeon_api.repository.DashboardRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class DashboardService {
 
-    @Autowired
-    private DashboardRepository dashboardRepository;
+    private final DashboardRepository repo;
+    private final AlertaService alertaService;
+    private final PrevisaoService previsaoService;
 
-    @Autowired
-    private LogService logService;
+    public DashboardService(
+            DashboardRepository repo,
+            AlertaService alertaService,
+            PrevisaoService previsaoService
+    ) {
+        this.repo = repo;
+        this.alertaService = alertaService;
+        this.previsaoService = previsaoService;
+    }
 
-    public Map<String, Object> getResumo(UUID empresaId, UUID usuarioId) {
-        Map<String, Object> data = new HashMap<>();
+    public DashboardResumoDTO getResumo(UUID empresaPublicId) {
 
-        // KPIs principais
-        data.put("produtosTotais", dashboardRepository.countProdutos(empresaId));
-        data.put("clientesTotais", dashboardRepository.countClientes(empresaId));
-        data.put("impressorasAtivas", dashboardRepository.countImpressorasAtivas(empresaId));
-        data.put("producoesAtivas", dashboardRepository.countProducoesAtivas(empresaId));
-        data.put("faturamentoMensal", dashboardRepository.faturamentoMensal(empresaId));
-        data.put("ticketMedio", dashboardRepository.ticketMedio(empresaId));
-        data.put("vendasConcluidas", dashboardRepository.totalVendasConcluidas(empresaId));
-        data.put("eficienciaMedia", dashboardRepository.eficienciaMedia(empresaId));
-        data.put("manutencoesRecentes", dashboardRepository.manutencoesRecentes(empresaId));
+        Map<String, Object> vendasMes = repo.vendasMesAtual(empresaPublicId);
 
-        // Indicadores técnicos
-        data.put("filamentoConsumidoKg", dashboardRepository.consumoTotalFilamento(empresaId));
-        data.put("pesoPerdidoKg", dashboardRepository.pesoPerdido(empresaId));
+        Double faturamentoMesAtual = vendasMes != null
+                ? ((Number) vendasMes.get("valorTotal")).doubleValue()
+                : 0.0;
 
-        // Gráficos e listas
-        data.put("graficoProducaoSemanal", dashboardRepository.producaoSemanal(empresaId));
-        data.put("topProdutos", dashboardRepository.topProdutosVendidos(empresaId));
-        data.put("filamentos", dashboardRepository.estoqueFilamentos(empresaId));
-        data.put("impressoras", dashboardRepository.impressorasAtivas(empresaId));
-        data.put("statusImpressoras", dashboardRepository.statusImpressoras(empresaId));
+        Long vendasMesAtual = vendasMes != null
+                ? ((Number) vendasMes.get("totalVendas")).longValue()
+                : 0L;
 
-//         Log automático
-        LogRequest log = new LogRequest();
-        log.setEmpresaId(empresaId);
-        log.setUsuarioId(usuarioId);
-        log.setEntidade("Dashboard");
-        log.setEntidadeId(null);
-        log.setAcao("Dashboard consultado (resumo atualizado)");
-        logService.registrar(log);
+        Double ticketMedioMesAtual =
+                vendasMesAtual > 0 ? faturamentoMesAtual / vendasMesAtual : 0.0;
 
-        return data;
+        return new DashboardResumoDTO(
+                repo.countProdutos(empresaPublicId),
+                repo.countClientes(empresaPublicId),
+                repo.countImpressorasAtivas(empresaPublicId),
+                repo.countProducoesAtivas(empresaPublicId),
+
+                faturamentoMesAtual,
+                vendasMesAtual,
+                ticketMedioMesAtual,
+
+                repo.faturamentoMensal(empresaPublicId),
+                repo.vendasPorMes(empresaPublicId),
+                repo.ticketMedioMensal(empresaPublicId),
+
+                repo.topProdutosPorFaturamento(empresaPublicId),
+
+                repo.eficienciaMedia(empresaPublicId),
+                repo.percentualPerdaFilamento(empresaPublicId),
+
+                alertaService.gerarAlertas(empresaPublicId),
+                previsaoService.preverFaturamentoProximoMes(empresaPublicId)
+        );
     }
 }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -14,35 +15,60 @@ import java.util.UUID;
 @Setter
 public class Venda {
 
+    /* =========================
+       IDS
+    ========================= */
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private UUID id; // interno DB
 
-    @ManyToOne
-    @JoinColumn(name = "empresa_id", nullable = false)
-    private Empresa empresa;
+    @Column(name = "public_id", nullable = false, unique = true, updatable = false)
+    private UUID publicId;
 
-    @ManyToOne
-    @JoinColumn(name = "produto_id", nullable = false)
-    private Produto produto;
+    @Column(name = "empresa_public_id", nullable = false)
+    private UUID empresaPublicId;
 
-    @ManyToOne
-    @JoinColumn(name = "cliente_id", nullable = false)
-    private Cliente cliente;
+    @Column(name = "produto_public_id", nullable = false)
+    private UUID produtoPublicId;
+
+    /* =========================
+       SNAPSHOT DO PRODUTO
+    ========================= */
+
+    @Column(name = "produto_nome", nullable = false, length = 255)
+    private String produtoNome;
 
     @Column(nullable = false)
     private Integer quantidade;
 
     @Column(name = "preco_unitario", nullable = false)
-    private Double precoUnitario;
+    private BigDecimal precoUnitario;
 
-    @Column(name = "valor_total", nullable = false)
-    private Double valorTotal;
+    @Column(nullable = false)
+    private BigDecimal total;
+
+    /* =========================
+       STATUS
+    ========================= */
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private StatusVenda status = StatusVenda.PENDENTE;
+    private StatusVenda status;
+
+    /* =========================
+       CONTROLE
+    ========================= */
 
     @Column(nullable = false)
-    private LocalDateTime data = LocalDateTime.now();
+    private Boolean ativo = true;
+
+    @Column(name = "criado_em", nullable = false, updatable = false)
+    private LocalDateTime criadoEm;
+
+    @Column(name = "atualizado_em")
+    private LocalDateTime atualizadoEm;
+
+    @Column(name = "criado_por")
+    private UUID criadoPor;
 }

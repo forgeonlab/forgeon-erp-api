@@ -13,145 +13,152 @@ import java.util.UUID;
 @Repository
 public interface DashboardRepository extends JpaRepository<Dashboard, UUID> {
 
-    /* === DADOS GERAIS ======================================================= */
+    /* =======================
+       CONTADORES GERAIS
+    ======================= */
 
     @Query(value = """
-        SELECT COUNT(*) FROM produtos WHERE empresa_id = :empresaId
+        SELECT COUNT(*)
+        FROM produtos
+        WHERE empresa_public_id = :empresaPublicId
     """, nativeQuery = true)
-    Long countProdutos(@Param("empresaId") UUID empresaId);
+    Long countProdutos(@Param("empresaPublicId") UUID empresaPublicId);
 
     @Query(value = """
-        SELECT COUNT(*) FROM clientes WHERE empresa_id = :empresaId
+        SELECT COUNT(*)
+        FROM clientes c
+        JOIN empresas e ON e.id = c.empresa_id
+        WHERE e.public_id = :empresaPublicId
     """, nativeQuery = true)
-    Long countClientes(@Param("empresaId") UUID empresaId);
+    Long countClientes(@Param("empresaPublicId") UUID empresaPublicId);
 
     @Query(value = """
-        SELECT COUNT(*) FROM impressoras 
-        WHERE empresa_id = :empresaId AND ativo = 1
-    """, nativeQuery = true)
-    Long countImpressorasAtivas(@Param("empresaId") UUID empresaId);
-
-    @Query(value = """
-        SELECT COUNT(*) FROM producoes 
-        WHERE empresa_id = :empresaId AND status = 'EM_ANDAMENTO'
-    """, nativeQuery = true)
-    Long countProducoesAtivas(@Param("empresaId") UUID empresaId);
-
-    @Query(value = """
-  SELECT DATE_FORMAT(MIN(data), '%b') AS mes,
-      SUM(valor_total) AS total
-  FROM vendas
-  WHERE empresa_id = :empresaId
-    AND status = 'CONCLUIDA'
-    AND YEAR(data) = YEAR(CURDATE())
-  GROUP BY YEAR(data), MONTH(data)
-  ORDER BY YEAR(data), MONTH(data)
-""", nativeQuery = true)
-    List<Map<String, Object>> faturamentoMensal(@Param("empresaId") UUID empresaId);
-
-
-
-
-    @Query(value = """
-        SELECT COALESCE(AVG(preco_unitario), 0)
-        FROM vendas
-        WHERE empresa_id = :empresaId AND status = 'CONCLUIDA'
-    """, nativeQuery = true)
-    Double ticketMedio(@Param("empresaId") UUID empresaId);
-
-    @Query(value = """
-        SELECT COUNT(*) FROM vendas
-        WHERE empresa_id = :empresaId AND status = 'CONCLUIDA'
-    """, nativeQuery = true)
-    Long totalVendasConcluidas(@Param("empresaId") UUID empresaId);
-
-    @Query(value = """
-        SELECT COALESCE(SUM(peso_usado), 0)
-        FROM consumo_filamento cf
-        JOIN producoes p ON p.id = cf.producao_id
-        WHERE p.empresa_id = :empresaId
-    """, nativeQuery = true)
-    Double consumoTotalFilamento(@Param("empresaId") UUID empresaId);
-
-    @Query(value = """
-        SELECT COALESCE(SUM(peso_perdido), 0)
-        FROM perdas pe
-        JOIN producoes p ON p.id = pe.producao_id
-        WHERE p.empresa_id = :empresaId
-    """, nativeQuery = true)
-    Double pesoPerdido(@Param("empresaId") UUID empresaId);
-
-    /* === GRÁFICOS ========================================================== */
-
-    @Query(value = """
-        SELECT DATE(data) as dia, COUNT(*) as total
-        FROM producoes
-        WHERE empresa_id = :empresaId
-          AND DATE(data) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
-        GROUP BY DATE(data)
-        ORDER BY dia ASC
-    """, nativeQuery = true)
-    List<Map<String, Object>> producaoSemanal(@Param("empresaId") UUID empresaId);
-
-    @Query(value = """
-        SELECT p.nome AS produto, SUM(v.quantidade) AS total
-        FROM vendas v
-        JOIN produtos p ON p.id = v.produto_id
-        WHERE v.empresa_id = :empresaId
-          AND v.status = 'CONCLUIDA'
-        GROUP BY p.id
-        ORDER BY total DESC
-        LIMIT 5
-    """, nativeQuery = true)
-    List<Map<String, Object>> topProdutosVendidos(@Param("empresaId") UUID empresaId);
-
-    @Query(value = """
-        SELECT material, SUM(peso_atual) as peso_restante
-        FROM filamentos
-        WHERE empresa_id = :empresaId AND ativo = 1
-        GROUP BY material
-    """, nativeQuery = true)
-    List<Map<String, Object>> estoqueFilamentos(@Param("empresaId") UUID empresaId);
-
-    @Query(value = """
-        SELECT status, COUNT(*) as total
-        FROM impressoras
-        WHERE empresa_id = :empresaId
-        GROUP BY status
-    """, nativeQuery = true)
-    List<Map<String, Object>> statusImpressoras(@Param("empresaId") UUID empresaId);
-
-    /* === EFICIÊNCIA E INDICADORES ========================================= */
-
-    @Query(value = """
-        SELECT 
-          ROUND( (SUM(quantidade_boa) / SUM(quantidade_planejada)) * 100 , 1)
-        FROM producoes
-        WHERE empresa_id = :empresaId
-          AND status = 'FINALIZADA'
-          AND quantidade_planejada > 0
-    """, nativeQuery = true)
-    Double eficienciaMedia(@Param("empresaId") UUID empresaId);
-
-    @Query(value = """
-        SELECT COUNT(*) FROM manutencoes m
-        JOIN impressoras i ON i.id = m.impressora_id
-        WHERE i.empresa_id = :empresaId
-          AND DATE(m.data) >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-    """, nativeQuery = true)
-    Long manutencoesRecentes(@Param("empresaId") UUID empresaId);
-
-    /* === OUTROS ============================================================ */
-
-    @Query(value = """
-        SELECT i.nome, i.status, p.id AS producao_id, p.quantidade_planejada, p.quantidade_boa
+        SELECT COUNT(*)
         FROM impressoras i
-        LEFT JOIN producoes p 
-          ON p.impressora_id = i.id
-          AND p.status = 'EM_ANDAMENTO'
-        WHERE i.empresa_id = :empresaId
+        JOIN empresas e ON e.id = i.empresa_id
+        WHERE e.public_id = :empresaPublicId
           AND i.ativo = 1
     """, nativeQuery = true)
-    List<Map<String, Object>> impressorasAtivas(@Param("empresaId") UUID empresaId);
+    Long countImpressorasAtivas(@Param("empresaPublicId") UUID empresaPublicId);
 
+    @Query(value = """
+        SELECT COUNT(*)
+        FROM producoes p
+        JOIN empresas e ON e.id = p.empresa_id
+        WHERE e.public_id = :empresaPublicId
+          AND p.status = 'EM_ANDAMENTO'
+    """, nativeQuery = true)
+    Long countProducoesAtivas(@Param("empresaPublicId") UUID empresaPublicId);
+
+    /* =======================
+       FINANCEIRO
+    ======================= */
+
+    @Query(value = """
+        SELECT
+          COUNT(*) AS totalVendas,
+          COALESCE(SUM(v.total), 0) AS valorTotal
+        FROM vendas v
+        WHERE v.empresa_public_id = :empresaPublicId
+          AND v.status = 'CONCLUIDA'
+          AND YEAR(v.criado_em) = YEAR(CURDATE())
+          AND MONTH(v.criado_em) = MONTH(CURDATE())
+    """, nativeQuery = true)
+    Map<String, Object> vendasMesAtual(@Param("empresaPublicId") UUID empresaPublicId);
+
+    @Query(value = """
+        SELECT
+          DATE_FORMAT(v.criado_em, '%Y-%m') AS mes,
+          SUM(v.total) AS faturamento
+        FROM vendas v
+        WHERE v.empresa_public_id = :empresaPublicId
+          AND v.status = 'CONCLUIDA'
+        GROUP BY DATE_FORMAT(v.criado_em, '%Y-%m')
+        ORDER BY mes
+    """, nativeQuery = true)
+    List<Map<String, Object>> faturamentoMensal(@Param("empresaPublicId") UUID empresaPublicId);
+
+    @Query(value = """
+        SELECT
+          DATE_FORMAT(v.criado_em, '%Y-%m') AS mes,
+          COUNT(*) AS total
+        FROM vendas v
+        WHERE v.empresa_public_id = :empresaPublicId
+          AND v.status = 'CONCLUIDA'
+        GROUP BY DATE_FORMAT(v.criado_em, '%Y-%m')
+        ORDER BY mes
+    """, nativeQuery = true)
+    List<Map<String, Object>> vendasPorMes(@Param("empresaPublicId") UUID empresaPublicId);
+
+    @Query(value = """
+        SELECT
+          DATE_FORMAT(v.criado_em, '%Y-%m') AS mes,
+          ROUND(SUM(v.total) / NULLIF(COUNT(*), 0), 2) AS ticket_medio
+        FROM vendas v
+        WHERE v.empresa_public_id = :empresaPublicId
+          AND v.status = 'CONCLUIDA'
+        GROUP BY DATE_FORMAT(v.criado_em, '%Y-%m')
+        ORDER BY mes
+    """, nativeQuery = true)
+    List<Map<String, Object>> ticketMedioMensal(@Param("empresaPublicId") UUID empresaPublicId);
+
+    @Query(value = """
+        SELECT
+          pr.nome AS produto,
+          SUM(v.total) AS faturamento
+        FROM vendas v
+        JOIN produtos pr ON pr.public_id = v.produto_public_id
+        WHERE v.empresa_public_id = :empresaPublicId
+          AND v.status = 'CONCLUIDA'
+        GROUP BY pr.id, pr.nome
+        ORDER BY faturamento DESC
+        LIMIT 5
+    """, nativeQuery = true)
+    List<Map<String, Object>> topProdutosPorFaturamento(@Param("empresaPublicId") UUID empresaPublicId);
+
+    @Query(value = """
+        SELECT
+          SUM(CASE
+              WHEN YEAR(v.criado_em) = YEAR(CURDATE())
+               AND MONTH(v.criado_em) = MONTH(CURDATE())
+              THEN v.total ELSE 0 END) AS mes_atual,
+          SUM(CASE
+              WHEN YEAR(v.criado_em) = YEAR(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+               AND MONTH(v.criado_em) = MONTH(DATE_SUB(CURDATE(), INTERVAL 1 MONTH))
+              THEN v.total ELSE 0 END) AS mes_anterior
+        FROM vendas v
+        WHERE v.empresa_public_id = :empresaPublicId
+          AND v.status = 'CONCLUIDA'
+    """, nativeQuery = true)
+    Map<String, Object> comparativoMensal(@Param("empresaPublicId") UUID empresaPublicId);
+
+    /* =======================
+       PRODUÇÃO / MATERIAL
+    ======================= */
+
+    @Query(value = """
+        SELECT ROUND(
+            (SUM(p.quantidade_boa) / NULLIF(SUM(p.quantidade_planejada), 0)) * 100, 1
+        )
+        FROM producoes p
+        JOIN empresas e ON e.id = p.empresa_id
+        WHERE e.public_id = :empresaPublicId
+          AND p.status = 'FINALIZADA'
+    """, nativeQuery = true)
+    Double eficienciaMedia(@Param("empresaPublicId") UUID empresaPublicId);
+
+    @Query(value = """
+        SELECT
+          ROUND(
+            (SUM(pe.peso_perdido) /
+            NULLIF(SUM(cf.peso_usado) + SUM(pe.peso_perdido), 0)) * 100,
+            2
+          )
+        FROM perdas pe
+        JOIN producoes p ON p.id = pe.producao_id
+        JOIN consumo_filamento cf ON cf.producao_id = p.id
+        JOIN empresas e ON e.id = p.empresa_id
+        WHERE e.public_id = :empresaPublicId
+    """, nativeQuery = true)
+    Double percentualPerdaFilamento(@Param("empresaPublicId") UUID empresaPublicId);
 }

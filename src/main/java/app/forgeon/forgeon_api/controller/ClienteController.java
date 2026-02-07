@@ -2,48 +2,119 @@ package app.forgeon.forgeon_api.controller;
 
 import app.forgeon.forgeon_api.dto.cliente.ClienteCreateDTO;
 import app.forgeon.forgeon_api.dto.cliente.ClienteDTO;
+import app.forgeon.forgeon_api.dto.cliente.ClienteEstatisticasDTO;
+import app.forgeon.forgeon_api.security.AuthContext;
+import app.forgeon.forgeon_api.security.AuthContextHolder;
 import app.forgeon.forgeon_api.service.ClienteService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/clientes")
-@CrossOrigin(origins = "*")
 public class ClienteController {
 
-    @Autowired
-    private ClienteService clienteService;
+    private final ClienteService clienteService;
 
-    @GetMapping("/empresa/{empresaId}")
-    public List<ClienteDTO> listarPorEmpresa(@PathVariable UUID empresaId) {
-        return clienteService.listarPorEmpresa(empresaId);
+    public ClienteController(ClienteService clienteService) {
+        this.clienteService = clienteService;
     }
 
+    /* =========================
+       LISTAR CLIENTES
+    ========================= */
+    @GetMapping
+    public Page<ClienteDTO> listar(
+            @RequestParam(required = false) Boolean ativo,
+            @RequestParam(required = false) String search,
+            Pageable pageable
+    ) {
+        AuthContext auth = AuthContextHolder.get();
+
+        return clienteService.listar(
+                ativo,
+                search,
+                pageable,
+                auth.getEmpresaPublicId()
+        );
+    }
+
+    /* =========================
+       BUSCAR CLIENTE
+    ========================= */
     @GetMapping("/{id}")
     public ClienteDTO buscarPorId(@PathVariable UUID id) {
-        return clienteService.buscarPorId(id);
+        AuthContext auth = AuthContextHolder.get();
+
+        return clienteService.buscarPorId(
+                id,
+                auth.getEmpresaPublicId()
+        );
     }
 
+    /* =========================
+       CRIAR CLIENTE
+    ========================= */
     @PostMapping
-    public ClienteDTO criar(@RequestBody ClienteCreateDTO dto) {
-        return clienteService.criar(dto);
+    @ResponseStatus(HttpStatus.CREATED)
+    public ClienteDTO criar(@Valid @RequestBody ClienteCreateDTO dto) {
+        AuthContext auth = AuthContextHolder.get();
+
+        return clienteService.criar(
+                dto,
+                auth.getEmpresaPublicId(),
+                auth.getUsuarioPublicId()
+        );
     }
 
+    /* =========================
+       ATUALIZAR CLIENTE
+    ========================= */
     @PutMapping("/{id}")
-    public ClienteDTO atualizar(@PathVariable UUID id, @RequestBody ClienteCreateDTO dto) {
-        return clienteService.atualizar(id, dto);
+    public ClienteDTO atualizar(
+            @PathVariable UUID id,
+            @Valid @RequestBody ClienteCreateDTO dto
+    ) {
+        AuthContext auth = AuthContextHolder.get();
+
+        return clienteService.atualizar(
+                id,
+                dto,
+                auth.getEmpresaPublicId()
+        );
     }
 
-    @DeleteMapping("/{id}")
-    public void deletar(@PathVariable UUID id) {
-        clienteService.deletar(id);
-    }
-
+    /* =========================
+       ATIVAR / DESATIVAR
+    ========================= */
     @PatchMapping("/{id}/status")
-    public void alterarStatus(@PathVariable UUID id, @RequestParam Boolean ativo) {
-        clienteService.alterarStatus(id, ativo);
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void alterarStatus(
+            @PathVariable UUID id,
+            @RequestParam Boolean ativo
+    ) {
+        AuthContext auth = AuthContextHolder.get();
+
+        clienteService.alterarStatus(
+                id,
+                ativo,
+                auth.getEmpresaPublicId()
+        );
+    }
+
+    /* =========================
+       ESTATÍSTICAS
+    ========================= */
+    @GetMapping("/estatisticas")
+    public ClienteEstatisticasDTO estatisticas() {
+        AuthContext auth = AuthContextHolder.get();
+
+        return clienteService.estatisticas(
+                auth.getEmpresaPublicId()
+        );
     }
 }

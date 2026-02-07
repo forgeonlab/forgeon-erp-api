@@ -3,9 +3,10 @@ package app.forgeon.forgeon_api.controller;
 import app.forgeon.forgeon_api.dto.produto.ProdutoRequest;
 import app.forgeon.forgeon_api.dto.produto.ProdutoResponse;
 import app.forgeon.forgeon_api.dto.produto.ProdutoVendaDTO;
-import app.forgeon.forgeon_api.repository.VendaRepository;
+import app.forgeon.forgeon_api.security.AuthContext;
+import app.forgeon.forgeon_api.security.AuthContextHolder;
 import app.forgeon.forgeon_api.service.ProdutoService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,39 +18,94 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")
 public class ProdutoController {
 
-    private final ProdutoService service;
-    @Autowired
-    private final VendaRepository vendaRepository;
+    private final ProdutoService produtoService;
 
-    public ProdutoController(ProdutoService service, VendaRepository venda) {
-        this.service = service;
-        this.vendaRepository = venda;
+    public ProdutoController(ProdutoService produtoService) {
+        this.produtoService = produtoService;
     }
 
-    @GetMapping("/empresa/{empresaId}")
-    public ResponseEntity<List<ProdutoResponse>> listar(@PathVariable UUID empresaId) {
-        return ResponseEntity.ok(service.listarPorEmpresa(empresaId));
+    /* =========================
+       LISTAR PRODUTOS
+    ========================= */
+    @GetMapping
+    public ResponseEntity<List<ProdutoResponse>> listar() {
+
+        AuthContext auth = AuthContextHolder.get();
+
+        return ResponseEntity.ok(
+                produtoService.listarPorEmpresa(
+                        auth.getEmpresaPublicId()
+                )
+        );
     }
 
+    /* =========================
+       CRIAR PRODUTO
+    ========================= */
     @PostMapping
-    public ResponseEntity<ProdutoResponse> criar(@RequestBody ProdutoRequest dto) {
-        return ResponseEntity.ok(service.criar(dto));
+    public ResponseEntity<ProdutoResponse> criar(
+            @RequestBody @Valid ProdutoRequest dto
+    ) {
+
+        AuthContext auth = AuthContextHolder.get();
+
+        return ResponseEntity.status(201).body(
+                produtoService.criar(
+                        dto,
+                        auth.getEmpresaPublicId(),
+                        auth.getUsuarioPublicId()
+                )
+        );
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ProdutoResponse> atualizar(@PathVariable UUID id, @RequestBody ProdutoRequest dto) {
-        return ResponseEntity.ok(service.atualizar(id, dto));
+    /* =========================
+       ATUALIZAR PRODUTO
+    ========================= */
+    @PutMapping("/{publicId}")
+    public ResponseEntity<ProdutoResponse> atualizar(
+            @PathVariable UUID publicId,
+            @RequestBody @Valid ProdutoRequest dto
+    ) {
+
+        AuthContext auth = AuthContextHolder.get();
+
+        return ResponseEntity.ok(
+                produtoService.atualizar(
+                        publicId,
+                        dto,
+                        auth.getEmpresaPublicId()
+                )
+        );
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable UUID id) {
-        service.deletar(id);
+    /* =========================
+       DELETAR PRODUTO
+    ========================= */
+    @DeleteMapping("/{publicId}")
+    public ResponseEntity<Void> deletar(@PathVariable UUID publicId) {
+
+        AuthContext auth = AuthContextHolder.get();
+
+        produtoService.deletar(
+                publicId,
+                auth.getEmpresaPublicId()
+        );
+
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/empresa/{empresaId}/vendas")
-    public List<ProdutoVendaDTO> teste(@PathVariable UUID empresaId) {
-        return vendaRepository.vendasPorProduto(empresaId);
-    }
+    /* =========================
+       VENDAS POR PRODUTO
+    ========================= */
+    @GetMapping("/vendas")
+    public ResponseEntity<List<ProdutoVendaDTO>> listarVendasPorProduto() {
 
+        AuthContext auth = AuthContextHolder.get();
+
+        return ResponseEntity.ok(
+                produtoService.listarVendasPorProduto(
+                        auth.getEmpresaPublicId()
+                )
+        );
+    }
 }

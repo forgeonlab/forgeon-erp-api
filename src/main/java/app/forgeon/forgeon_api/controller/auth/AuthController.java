@@ -2,6 +2,8 @@ package app.forgeon.forgeon_api.controller.auth;
 
 import app.forgeon.forgeon_api.dto.auth.LoginRequestDTO;
 import app.forgeon.forgeon_api.dto.auth.LoginResponseDTO;
+import app.forgeon.forgeon_api.dto.auth.RefreshTokenRequestDTO;
+import app.forgeon.forgeon_api.model.auth.RefreshTokenRequest;
 import app.forgeon.forgeon_api.service.auth.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -21,14 +23,21 @@ public class AuthController {
     public ResponseEntity<LoginResponseDTO> login(
             @RequestBody @Valid LoginRequestDTO request
     ) {
-
-        String token = authService.login(
-                request.email(),
-                request.senha()
-        );
-
         return ResponseEntity.ok(
-                new LoginResponseDTO(token)
+                authService.login(request.email(), request.senha())
         );
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponseDTO> refresh(
+            @RequestBody RefreshTokenRequestDTO request
+    ) {
+        return ResponseEntity.ok(
+                authService.refresh(request.refreshToken())
+        );
+    }
+
+
+
 }
+
