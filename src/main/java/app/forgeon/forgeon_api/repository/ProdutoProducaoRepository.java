@@ -1,0 +1,9 @@
+package app.forgeon.forgeon_api.repository;
+
+import app.forgeon.forgeon_api.model.ProdutoProducao;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.UUID;
+
+public interface ProdutoProducaoRepository extends JpaRepository<ProdutoProducao, UUID> {
+}

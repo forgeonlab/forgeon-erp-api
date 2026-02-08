@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -49,4 +50,22 @@ public class Produto {
 
     @Column(name = "criado_por")
     private UUID criadoPor;
+
+    // 🔗 Relações
+    @OneToOne(mappedBy = "produto", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    private ProdutoProducao producao;
+
+    @OneToMany(mappedBy = "produto", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ProdutoPreco> precos;
+
+    @PrePersist
+    public void prePersist() {
+        this.publicId = UUID.randomUUID();
+        this.criadoEm = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        this.atualizadoEm = LocalDateTime.now();
+    }
 }

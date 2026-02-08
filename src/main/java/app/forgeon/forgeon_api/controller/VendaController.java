@@ -42,21 +42,21 @@ public class VendaController {
     /* =========================
        CRIAR VENDA
     ========================= */
-    @PostMapping
-    public ResponseEntity<VendaResponse> criar(
-            @RequestBody @Valid VendaRequest dto
-    ) {
-
-        AuthContext auth = AuthContextHolder.get();
-
-        return ResponseEntity.status(201).body(
-                vendaService.criar(
-                        dto,
-                        auth.getEmpresaPublicId(),
-                        auth.getUsuarioPublicId()
-                )
-        );
-    }
+//    @PostMapping
+//    public ResponseEntity<VendaResponse> criar(
+//            @RequestBody @Valid VendaRequest dto
+//    ) {
+//
+//        AuthContext auth = AuthContextHolder.get();
+//
+//        return ResponseEntity.status(201).body(
+//                vendaService.criar(
+//                        dto,
+//                        auth.getEmpresaPublicId(),
+//                        auth.getUsuarioPublicId()
+//                )
+//        );
+//    }
 
     /* =========================
        ATUALIZAR STATUS

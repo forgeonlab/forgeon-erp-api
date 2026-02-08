@@ -45,48 +45,48 @@ public class VendaService {
     /* =========================
        CRIAR VENDA
     ========================= */
-    @Transactional
-    public VendaResponse criar(
-            VendaRequest dto,
-            UUID empresaPublicId,
-            UUID usuarioPublicId
-    ) {
-
-        // 🔒 busca produto da mesma empresa
-        Produto produto = produtoRepository
-                .findByPublicIdAndEmpresaPublicIdAndAtivoTrue(
-                        dto.getProdutoPublicId(),
-                        empresaPublicId
-                )
-                .orElseThrow(() ->
-                        new RuntimeException("Produto não encontrado")
-                );
-
-        Venda venda = new Venda();
-        venda.setPublicId(UUID.randomUUID());
-        venda.setEmpresaPublicId(empresaPublicId);
-
-        venda.setProdutoPublicId(produto.getPublicId());
-        venda.setProdutoNome(produto.getNome());
-        venda.setQuantidade(dto.getQuantidade());
-
-        BigDecimal quantidade = BigDecimal.valueOf(dto.getQuantidade());
-        BigDecimal precoUnitario = produto.getPrecoVenda();
-        BigDecimal total = precoUnitario.multiply(quantidade);
-
-        venda.setPrecoUnitario(precoUnitario);
-        venda.setTotal(total);
-
-        venda.setStatus(StatusVenda.CONCLUIDA);
-        venda.setAtivo(true);
-
-        venda.setCriadoEm(LocalDateTime.now());
-        venda.setCriadoPor(usuarioPublicId);
-
-        Venda salva = vendaRepository.save(venda);
-
-        return VendaResponse.fromEntity(salva);
-    }
+//    @Transactional
+//    public VendaResponse criar(
+//            VendaRequest dto,
+//            UUID empresaPublicId,
+//            UUID usuarioPublicId
+//    ) {
+//
+//        // 🔒 busca produto da mesma empresa
+//        Produto produto = produtoRepository
+//                .findByPublicIdAndEmpresaPublicIdAndAtivoTrue(
+//                        dto.getProdutoPublicId(),
+//                        empresaPublicId
+//                )
+//                .orElseThrow(() ->
+//                        new RuntimeException("Produto não encontrado")
+//                );
+//
+//        Venda venda = new Venda();
+//        venda.setPublicId(UUID.randomUUID());
+//        venda.setEmpresaPublicId(empresaPublicId);
+//
+//        venda.setProdutoPublicId(produto.getPublicId());
+//        venda.setProdutoNome(produto.getNome());
+//        venda.setQuantidade(dto.getQuantidade());
+//
+//        BigDecimal quantidade = BigDecimal.valueOf(dto.getQuantidade());
+//        BigDecimal precoUnitario = produto.getPrecoVenda();
+//        BigDecimal total = precoUnitario.multiply(quantidade);
+//
+//        venda.setPrecoUnitario(precoUnitario);
+//        venda.setTotal(total);
+//
+//        venda.setStatus(StatusVenda.CONCLUIDA);
+//        venda.setAtivo(true);
+//
+//        venda.setCriadoEm(LocalDateTime.now());
+//        venda.setCriadoPor(usuarioPublicId);
+//
+//        Venda salva = vendaRepository.save(venda);
+//
+//        return VendaResponse.fromEntity(salva);
+//    }
 
     /* =========================
        ATUALIZAR STATUS
