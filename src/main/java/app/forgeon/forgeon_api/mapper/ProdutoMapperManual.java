@@ -12,6 +12,7 @@ public class ProdutoMapperManual {
         produto.setSku(dto.sku());
         produto.setNome(dto.nome());
         produto.setPrecoVenda(dto.precoVenda());
+        produto.setTipo(dto.tipo());
         produto.setAtivo(true);
         return produto;
     }
@@ -22,6 +23,7 @@ public class ProdutoMapperManual {
                 produto.getSku(),
                 produto.getNome(),
                 produto.getPrecoVenda(),
+                produto.getTipo(),
                 produto.getAtivo(),
                 produto.getCriadoEm()
         );

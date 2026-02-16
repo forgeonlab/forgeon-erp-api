@@ -176,6 +176,52 @@ public class EstoqueService {
         );
     }
 
+    @Transactional(readOnly = true)
+    public void validarDisponibilidade(
+            Produto produto,
+            Integer quantidade
+    ) {
+        Estoque estoque = estoqueRepository.findByProduto(produto).orElse(null);
+        if (estoque == null) {
+            // Sem registro de estoque: nao bloquear confirmacao do pedido.
+            return;
+        }
+
+        if (estoque.getQuantidade() - estoque.getReservado() < quantidade) {
+            throw new RuntimeException("Estoque insuficiente");
+        }
+    }
+
+    @Transactional
+    public boolean reservarSePossivel(
+            Produto produto,
+            Integer quantidade,
+            String referencia,
+            UUID usuarioPublicId
+    ) {
+        Estoque estoque = estoqueRepository.findByProduto(produto).orElse(null);
+        if (estoque == null) {
+            return false;
+        }
+
+        if (estoque.getQuantidade() - estoque.getReservado() < quantidade) {
+            return false;
+        }
+
+        estoque.setReservado(estoque.getReservado() + quantidade);
+        estoqueRepository.save(estoque);
+
+        registrarMovimentacao(
+                produto,
+                TipoMovimentacaoEstoque.RESERVA,
+                quantidade,
+                referencia,
+                usuarioPublicId
+        );
+
+        return true;
+    }
+
     @Transactional
     public void cancelarReserva(
             Produto produto,
@@ -196,6 +242,32 @@ public class EstoqueService {
                 referencia,
                 usuarioPublicId
         );
+    }
+
+    @Transactional
+    public boolean cancelarReservaSePossivel(
+            Produto produto,
+            Integer quantidade,
+            String referencia,
+            UUID usuarioPublicId
+    ) {
+        Estoque estoque = estoqueRepository.findByProduto(produto).orElse(null);
+        if (estoque == null) {
+            return false;
+        }
+
+        estoque.setReservado(estoque.getReservado() - quantidade);
+        estoqueRepository.save(estoque);
+
+        registrarMovimentacao(
+                produto,
+                TipoMovimentacaoEstoque.CANCELAMENTO_RESERVA,
+                quantidade,
+                referencia,
+                usuarioPublicId
+        );
+
+        return true;
     }
 
     @Transactional

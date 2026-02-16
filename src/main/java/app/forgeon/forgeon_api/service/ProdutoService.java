@@ -2,6 +2,7 @@ package app.forgeon.forgeon_api.service;
 
 import app.forgeon.forgeon_api.dto.produto.*;
 import app.forgeon.forgeon_api.enums.TipoMovimentacaoEstoque;
+import app.forgeon.forgeon_api.enums.TipoProduto;
 import app.forgeon.forgeon_api.exception.ProdutoNaoEncontradoException;
 import app.forgeon.forgeon_api.exception.SkuDuplicadoException;
 import app.forgeon.forgeon_api.mapper.*;
@@ -29,6 +30,8 @@ public class ProdutoService {
 
     private final CalculadoraPrecoService calculadoraPrecoService;
 
+    private final EstoqueRepository estoqueRepository;
+
     @Transactional
     public ProdutoDetalhadoResponseDTO criarProduto(
             ProdutoCreateRequestDTO produtoDTO,
@@ -51,6 +54,14 @@ public class ProdutoService {
         produto.setCriadoPor(usuarioPublicId);
 
         produto = produtoRepository.save(produto);
+
+        if (produto.getTipo() == TipoProduto.ESTOQUE) {
+            Estoque estoque = new Estoque();
+            estoque.setProduto(produto);
+            estoque.setQuantidade(0);
+            estoque.setReservado(0);
+            estoqueRepository.save(estoque);
+        }
 
         // 3️⃣ produção
         ProdutoProducao producao = producaoMapper.toEntity(producaoDTO);
@@ -99,6 +110,7 @@ public class ProdutoService {
                 .filter(p -> p.getEmpresaPublicId().equals(empresaPublicId))
                 .orElseThrow(() -> new ProdutoNaoEncontradoException(publicId));
 
+
         return montarDetalhado(produto);
     }
 
@@ -122,6 +134,12 @@ public class ProdutoService {
         Produto produto = produtoRepository.findByPublicId(publicId)
                 .filter(p -> p.getEmpresaPublicId().equals(empresaPublicId))
                 .orElseThrow(() -> new ProdutoNaoEncontradoException(publicId));
+
+        ProdutoUpdateRequestDTO produtoDTO = request.produto();
+        produto.setNome(produtoDTO.nome());
+        produto.setPrecoVenda(produtoDTO.precoVenda());
+        produto.setAtivo(produtoDTO.ativo());
+        produto.setTipo(produtoDTO.tipo());
 
         // produção
         ProdutoProducao producao = produto.getProducao();

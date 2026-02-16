@@ -1,11 +1,11 @@
 package app.forgeon.forgeon_api.dto.produto;
 
+import app.forgeon.forgeon_api.enums.TipoProduto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 public record ProdutoCreateRequestDTO(
         @NotBlank
@@ -15,6 +15,9 @@ public record ProdutoCreateRequestDTO(
         @NotBlank
         @Size(max = 255)
         String nome,
+
+        @NotNull
+        TipoProduto tipo,
 
         @NotNull
         BigDecimal precoVenda

@@ -1,6 +1,8 @@
 package app.forgeon.forgeon_api.model;
 
+import app.forgeon.forgeon_api.enums.TipoProduto;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -39,6 +41,11 @@ public class Produto {
     @Column(name = "preco_venda", nullable = false)
     private BigDecimal precoVenda;
 
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "tipo", nullable = false, length = 20)
+    private TipoProduto tipo = TipoProduto.ESTOQUE;
+
     @Column(nullable = false)
     private Boolean ativo = true;
 
@@ -62,6 +69,10 @@ public class Produto {
     public void prePersist() {
         this.publicId = UUID.randomUUID();
         this.criadoEm = LocalDateTime.now();
+        if (this.tipo == null) {
+            // Default for legacy records when tipo is omitted.
+            this.tipo = TipoProduto.ESTOQUE;
+        }
     }
 
     @PreUpdate

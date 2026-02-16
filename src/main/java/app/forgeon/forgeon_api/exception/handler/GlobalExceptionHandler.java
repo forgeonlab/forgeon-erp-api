@@ -1,12 +1,14 @@
 package app.forgeon.forgeon_api.exception.handler;
 
 import app.forgeon.forgeon_api.dto.error.ApiErrorDTO;
+import app.forgeon.forgeon_api.exception.PedidoStatusInvalidoException;
 import app.forgeon.forgeon_api.exception.ProdutoNaoEncontradoException;
 import app.forgeon.forgeon_api.exception.SkuDuplicadoException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -37,6 +39,17 @@ public class GlobalExceptionHandler {
                 ));
     }
 
+    @ExceptionHandler(PedidoStatusInvalidoException.class)
+    public ResponseEntity<ApiErrorDTO> handlePedidoStatusInvalido(PedidoStatusInvalidoException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiErrorDTO(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "STATUS_PEDIDO_INVALIDO",
+                        ex.getMessage(),
+                        LocalDateTime.now()
+                ));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorDTO> handleValidacao(MethodArgumentNotValidException ex) {
         String mensagem = ex.getBindingResult()
@@ -51,6 +64,17 @@ public class GlobalExceptionHandler {
                         HttpStatus.BAD_REQUEST.value(),
                         "VALIDACAO_INVALIDA",
                         mensagem,
+                        LocalDateTime.now()
+                ));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiErrorDTO> handleMetodoNaoSuportado(HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED)
+                .body(new ApiErrorDTO(
+                        HttpStatus.METHOD_NOT_ALLOWED.value(),
+                        "METODO_NAO_SUPORTADO",
+                        "Metodo nao suportado",
                         LocalDateTime.now()
                 ));
     }
