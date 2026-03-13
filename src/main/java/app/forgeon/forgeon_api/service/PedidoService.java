@@ -122,7 +122,7 @@ public class PedidoService {
                 pedidoPublicId, empresaPublicId
         ).orElseThrow();
 
-        if (pedido.getStatus() != StatusPedido.CONFIRMADO) {
+        if (pedido.getStatus() != StatusPedido.CONFIRMADO && pedido.getStatus() != StatusPedido.PRONTO_PARA_FATURAR) {
             throw new PedidoStatusInvalidoException("faturado", pedido.getStatus());
         }
 

@@ -1,5 +1,6 @@
 package app.forgeon.forgeon_api.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,7 @@ public class ItemPedido {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pedido_id", nullable = false)
+    @JsonBackReference
     private Pedido pedido;
 
     @ManyToOne(fetch = FetchType.LAZY)

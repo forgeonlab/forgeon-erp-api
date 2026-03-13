@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface ConsumoFilamentoRepository extends JpaRepository<ConsumoFilamento, UUID> {
     List<ConsumoFilamento> findByProducao_Id(UUID producaoId);
     List<ConsumoFilamento> findByFilamento_Id(UUID filamentoId);
+    boolean existsByFilamento_Id(UUID filamentoId);
 }

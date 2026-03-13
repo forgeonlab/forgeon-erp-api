@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface FilamentoRepository extends JpaRepository<Filamento, UUID> {
-    List<Filamento> findByEmpresaId(UUID empresaId);
+    List<Filamento> findByEmpresaIdAndAtivoTrue(UUID empresaId);
     Optional<Filamento> findByEmpresaIdAndSku(UUID empresaId, String sku);
+    boolean existsByEmpresaIdAndSku(UUID empresaId, String sku);
 }

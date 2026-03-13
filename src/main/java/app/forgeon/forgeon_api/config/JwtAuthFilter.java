@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.http.HttpMethod;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -34,7 +35,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
 
-        return path.startsWith("/auth")
+        return HttpMethod.OPTIONS.matches(request.getMethod())
+                || path.startsWith("/auth")
                 || path.startsWith("/onboarding")
                 || path.startsWith("/swagger-ui")
                 || path.startsWith("/v3/api-docs")

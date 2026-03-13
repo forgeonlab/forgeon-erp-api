@@ -35,8 +35,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, UUID> {
     @Query(value = """
         SELECT COUNT(*)
         FROM impressoras i
-        JOIN empresas e ON e.id = i.empresa_id
-        WHERE e.public_id = :empresaPublicId
+        WHERE i.empresa_public_id = :empresaPublicId
           AND i.ativo = 1
     """, nativeQuery = true)
     Long countImpressorasAtivas(@Param("empresaPublicId") UUID empresaPublicId);
@@ -44,9 +43,8 @@ public interface DashboardRepository extends JpaRepository<Dashboard, UUID> {
     @Query(value = """
         SELECT COUNT(*)
         FROM producoes p
-        JOIN empresas e ON e.id = p.empresa_id
-        WHERE e.public_id = :empresaPublicId
-          AND p.status = 'EM_ANDAMENTO'
+        WHERE p.empresa_public_id = :empresaPublicId
+          AND p.status = 'EM_PRODUCAO'
     """, nativeQuery = true)
     Long countProducoesAtivas(@Param("empresaPublicId") UUID empresaPublicId);
 
@@ -141,8 +139,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, UUID> {
             (SUM(p.quantidade_boa) / NULLIF(SUM(p.quantidade_planejada), 0)) * 100, 1
         )
         FROM producoes p
-        JOIN empresas e ON e.id = p.empresa_id
-        WHERE e.public_id = :empresaPublicId
+        WHERE p.empresa_public_id = :empresaPublicId
           AND p.status = 'FINALIZADA'
     """, nativeQuery = true)
     Double eficienciaMedia(@Param("empresaPublicId") UUID empresaPublicId);
@@ -157,8 +154,7 @@ public interface DashboardRepository extends JpaRepository<Dashboard, UUID> {
         FROM perdas pe
         JOIN producoes p ON p.id = pe.producao_id
         JOIN consumo_filamento cf ON cf.producao_id = p.id
-        JOIN empresas e ON e.id = p.empresa_id
-        WHERE e.public_id = :empresaPublicId
+        WHERE p.empresa_public_id = :empresaPublicId
     """, nativeQuery = true)
     Double percentualPerdaFilamento(@Param("empresaPublicId") UUID empresaPublicId);
 }

@@ -14,26 +14,42 @@ import java.util.UUID;
 @Setter
 public class Producao {
 
+    /* ================= IDENTIDADE INTERNA ================= */
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "empresa_id", nullable = false)
-    private UUID empresaId;
+    /* ================= IDENTIDADE EXTERNA ================= */
 
-    @ManyToOne
+    @Column(name = "public_id", unique = true, nullable = false, updatable = false)
+    private UUID publicId;
+
+    /* ================= MULTI-TENANT ================= */
+
+    @Column(name = "empresa_public_id", nullable = false, updatable = false)
+    private UUID empresaPublicId;
+
+    /* ================= RELAÇÕES ================= */
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "produto_id", nullable = false)
     private Produto produto;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "impressora_id")
     private Impressora impressora;
 
-    @Column
+    /* ================= CONTROLE DE PRODUÇÃO ================= */
+
+    @Column(name = "inicio")
     private LocalDateTime inicio;
 
     @Column(name = "fim_previsto")
     private LocalDateTime fimPrevisto;
+
+    @Column(name = "fim_real")
+    private LocalDateTime fimReal;
 
     @Column(name = "quantidade_planejada", nullable = false)
     private Integer quantidadePlanejada;
@@ -45,6 +61,29 @@ public class Producao {
     @Column(nullable = false, length = 20)
     private StatusProducao status = StatusProducao.PLANEJADA;
 
-    @Column(nullable = false)
-    private LocalDateTime data = LocalDateTime.now();
+    /* ================= AUDITORIA ================= */
+
+    @Column(name = "criado_em", nullable = false, updatable = false)
+    private LocalDateTime criadoEm;
+
+    @Column(name = "atualizado_em")
+    private LocalDateTime atualizadoEm;
+
+    @Column(name = "criado_por", nullable = false, updatable = false)
+    private UUID criadoPor;
+
+    /* ================= CALLBACKS ================= */
+
+    @PrePersist
+    public void prePersist() {
+        if (publicId == null) {
+            publicId = UUID.randomUUID();
+        }
+        criadoEm = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate() {
+        atualizadoEm = LocalDateTime.now();
+    }
 }

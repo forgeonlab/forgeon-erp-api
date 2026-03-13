@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface MovimentacaoFilamentoRepository extends JpaRepository<MovimentacaoFilamento, UUID> {
     List<MovimentacaoFilamento> findByEmpresaIdOrderByDataDesc(UUID empresaId);
+    boolean existsByFilamento_Id(UUID filamentoId);
 }

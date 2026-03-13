@@ -1,7 +1,6 @@
 package app.forgeon.forgeon_api.service;
 
-import app.forgeon.forgeon_api.dto.producao.ProducaoRequest;
-import app.forgeon.forgeon_api.dto.producao.ProducaoResponse;
+import app.forgeon.forgeon_api.dto.producao.*;
 import app.forgeon.forgeon_api.enums.StatusProducao;
 import app.forgeon.forgeon_api.model.Impressora;
 import app.forgeon.forgeon_api.model.Producao;
@@ -9,80 +8,211 @@ import app.forgeon.forgeon_api.model.Produto;
 import app.forgeon.forgeon_api.repository.ImpressoraRepository;
 import app.forgeon.forgeon_api.repository.ProducaoRepository;
 import app.forgeon.forgeon_api.repository.ProdutoRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ProducaoService {
 
     private final ProducaoRepository repository;
     private final ProdutoRepository produtoRepository;
     private final ImpressoraRepository impressoraRepository;
+    private final EstoqueService estoqueService;
 
-    public ProducaoService(ProducaoRepository repository,
-                           ProdutoRepository produtoRepository,
-                           ImpressoraRepository impressoraRepository) {
-        this.repository = repository;
-        this.produtoRepository = produtoRepository;
-        this.impressoraRepository = impressoraRepository;
-    }
+    /* ================= LISTAR ================= */
 
-    public List<ProducaoResponse> listarPorEmpresa(UUID empresaId) {
-        return repository.findByEmpresaIdOrderByDataDesc(empresaId)
+    public List<ProducaoResponse> listarPorEmpresa(UUID empresaPublicId) {
+
+        return repository
+                .findByEmpresaPublicIdOrderByCriadoEmDesc(empresaPublicId)
                 .stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    public ProducaoResponse criar(ProducaoRequest dto) {
-        Produto produto = produtoRepository.findById(dto.getProdutoId())
+    /* ================= CRIAR ================= */
+
+    public ProducaoResponse criar(
+            ProducaoRequest dto,
+            UUID empresaPublicId,
+            UUID usuarioPublicId
+    ) {
+
+        Produto produto = produtoRepository
+                .findByPublicIdAndEmpresaPublicId(
+                        dto.produtoPublicId(),
+                        empresaPublicId
+                )
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-        Impressora impressora = dto.getImpressoraId() != null
-                ? impressoraRepository.findById(dto.getImpressoraId())
-                .orElseThrow(() -> new RuntimeException("Impressora não encontrada"))
-                : null;
+
+        Impressora impressora = null;
+
+        if (dto.impressoraPublicId() != null) {
+            impressora = impressoraRepository
+                    .findByPublicIdAndEmpresaPublicId(
+                            dto.impressoraPublicId(),
+                            empresaPublicId
+                    )
+                    .orElseThrow(() -> new RuntimeException("Impressora não encontrada"));
+        }
+
+        /* ===== Bloqueio de impressora ===== */
+
+        if (impressora != null) {
+            boolean ocupada = repository
+                    .existsByEmpresaPublicIdAndImpressora_PublicIdAndStatus(
+                            empresaPublicId,
+                            impressora.getId(),
+                            StatusProducao.EM_PRODUCAO
+                    );
+
+            if (ocupada) {
+                throw new RuntimeException("Impressora já está em produção");
+            }
+        }
+
+        /* ===== Criar produção ===== */
 
         Producao p = new Producao();
-        p.setEmpresaId(dto.getEmpresaId());
+        p.setEmpresaPublicId(empresaPublicId);
         p.setProduto(produto);
         p.setImpressora(impressora);
-        p.setQuantidadePlanejada(dto.getQuantidadePlanejada());
-        p.setQuantidadeBoa(dto.getQuantidadeBoa() != null ? dto.getQuantidadeBoa() : 0);
-        p.setStatus(dto.getStatus() != null ? dto.getStatus() : StatusProducao.PLANEJADA);
-        p.setInicio(dto.getInicio());
-        p.setFimPrevisto(dto.getFimPrevisto());
+        p.setQuantidadePlanejada(dto.quantidadePlanejada());
+        p.setFimPrevisto(dto.fimPrevisto());
+        p.setQuantidadeBoa(0);
+        p.setStatus(StatusProducao.PLANEJADA);
+        p.setCriadoPor(usuarioPublicId);
 
         repository.save(p);
+
+        /* ===== Reserva opcional ===== */
+
+        if (dto.reservarEstoque()) {
+            estoqueService.reservar(
+                    produto,
+                    dto.quantidadePlanejada(),
+                    "Reserva Produção " + p.getPublicId(),
+                    usuarioPublicId
+            );
+        }
+
         return toResponse(p);
     }
 
-    public ProducaoResponse atualizarStatus(UUID id, StatusProducao novoStatus) {
-        Producao p = repository.findById(id)
+    /* ================= ATUALIZAR STATUS ================= */
+
+    public ProducaoResponse atualizarStatus(
+            UUID publicId,
+            StatusProducao novoStatus,
+            UUID empresaPublicId,
+            UUID usuarioPublicId
+    ) {
+
+        Producao p = repository
+                .findByPublicIdAndEmpresaPublicId(publicId, empresaPublicId)
                 .orElseThrow(() -> new RuntimeException("Produção não encontrada"));
 
         p.setStatus(novoStatus);
+
+        if (novoStatus == StatusProducao.EM_PRODUCAO) {
+            p.setInicio(LocalDateTime.now());
+        }
+
+        if (novoStatus == StatusProducao.FINALIZADA) {
+
+            p.setFimReal(LocalDateTime.now());
+
+            if (p.getQuantidadeBoa() > 0) {
+                estoqueService.entrada(
+                        p.getProduto(),
+                        p.getQuantidadeBoa(),
+                        "Produção " + p.getPublicId(),
+                        usuarioPublicId
+                );
+            }
+        }
+
         repository.save(p);
+
         return toResponse(p);
     }
 
-    public void deletar(UUID id) {
-        repository.deleteById(id);
+    /* ================= ATUALIZAR QUANTIDADE BOA ================= */
+
+    public ProducaoResponse atualizarQuantidadeBoa(
+            UUID publicId,
+            AtualizarQuantidadeBoaRequest dto,
+            UUID empresaPublicId
+    ) {
+
+        Producao p = repository
+                .findByPublicIdAndEmpresaPublicId(publicId, empresaPublicId)
+                .orElseThrow(() -> new RuntimeException("Produção não encontrada"));
+
+        if (dto.quantidadeBoa() > p.getQuantidadePlanejada()) {
+            throw new RuntimeException("Quantidade boa não pode ser maior que planejada");
+        }
+
+        p.setQuantidadeBoa(dto.quantidadeBoa());
+
+        repository.save(p);
+
+        return toResponse(p);
     }
 
+    /* ================= DELETAR ================= */
+
+    public void deletar(UUID publicId, UUID empresaPublicId) {
+
+        Producao p = repository
+                .findByPublicIdAndEmpresaPublicId(publicId, empresaPublicId)
+                .orElseThrow(() -> new RuntimeException("Produção não encontrada"));
+
+        repository.delete(p);
+    }
+
+    /* ================= DASHBOARD ================= */
+
+    public ProducaoDashboardDTO dashboard(UUID empresaPublicId) {
+
+        return new ProducaoDashboardDTO(
+                repository.countByEmpresaPublicId(empresaPublicId),
+                repository.countByEmpresaPublicIdAndStatus(empresaPublicId, StatusProducao.PLANEJADA),
+                repository.countByEmpresaPublicIdAndStatus(empresaPublicId, StatusProducao.EM_PRODUCAO),
+                repository.countByEmpresaPublicIdAndStatus(empresaPublicId, StatusProducao.FINALIZADA),
+                repository.countByEmpresaPublicIdAndStatus(empresaPublicId, StatusProducao.PAUSADA)
+        );
+    }
+
+    /* ================= MAPPER ================= */
+
     private ProducaoResponse toResponse(Producao p) {
+
         return new ProducaoResponse(
-                p.getId(),
+                p.getPublicId(),
+
                 p.getProduto().getNome(),
+                p.getProduto().getPublicId(),
+
                 p.getImpressora() != null ? p.getImpressora().getNome() : "-",
+                p.getImpressora() != null ? p.getImpressora().getId() : null,
+
                 p.getQuantidadePlanejada(),
                 p.getQuantidadeBoa(),
+
                 p.getStatus(),
+
                 p.getInicio(),
                 p.getFimPrevisto(),
-                p.getData()
+                p.getFimReal(),
+
+                p.getCriadoEm(),
+                p.getAtualizadoEm()
         );
     }
 }

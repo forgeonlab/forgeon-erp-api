@@ -1,21 +1,24 @@
 package app.forgeon.forgeon_api.dto.producao;
 
-import app.forgeon.forgeon_api.enums.StatusProducao;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Getter
-@Setter
-public class ProducaoRequest {
-    private UUID empresaId;
-    private UUID produtoId;
-    private UUID impressoraId;
-    private Integer quantidadePlanejada;
-    private Integer quantidadeBoa;
-    private StatusProducao status;
-    private LocalDateTime inicio;
-    private LocalDateTime fimPrevisto;
-}
+public record ProducaoRequest(
+
+        @NotNull
+        UUID produtoPublicId,
+
+        UUID impressoraPublicId,
+
+        @NotNull
+        @Positive
+        Integer quantidadePlanejada,
+
+        LocalDateTime fimPrevisto,
+
+        boolean reservarEstoque
+
+) {}

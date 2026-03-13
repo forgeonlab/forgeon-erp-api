@@ -2,7 +2,8 @@ package app.forgeon.forgeon_api.enums;
 
 public enum StatusProducao {
     PLANEJADA,
-    EM_ANDAMENTO,
+    EM_PRODUCAO,
     FINALIZADA,
+    PAUSADA,
     CANCELADA
 }

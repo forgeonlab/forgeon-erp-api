@@ -6,42 +6,46 @@ import app.forgeon.forgeon_api.model.Impressora;
 import app.forgeon.forgeon_api.model.Manutencao;
 import app.forgeon.forgeon_api.repository.ImpressoraRepository;
 import app.forgeon.forgeon_api.repository.ManutencaoRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ManutencaoService {
 
     private final ManutencaoRepository repository;
     private final ImpressoraRepository impressoraRepository;
 
-    public ManutencaoService(ManutencaoRepository repository, ImpressoraRepository impressoraRepository) {
-        this.repository = repository;
-        this.impressoraRepository = impressoraRepository;
-    }
+    /* ================= LISTAR ================= */
 
-    public List<ManutencaoResponse> listarPorEmpresa(UUID empresaId) {
-        return repository.findByImpressora_EmpresaIdOrderByDataDesc(empresaId)
+    public List<ManutencaoResponse> listarPorEmpresa(UUID empresaPublicId) {
+
+        return repository
+                .findByEmpresaPublicIdOrderByDataDesc(empresaPublicId)
                 .stream()
-                .map(m -> new ManutencaoResponse(
-                        m.getId(),
-                        m.getImpressora().getNome(),
-                        m.getTipo(),
-                        m.getDescricao(),
-                        m.getCusto(),
-                        m.getData()
-                ))
-                .collect(Collectors.toList());
+                .map(this::toResponse)
+                .toList();
     }
 
-    public ManutencaoResponse criar(ManutencaoRequest dto) {
-        Impressora impressora = impressoraRepository.findById(dto.getImpressoraId())
+    /* ================= CRIAR ================= */
+
+    public ManutencaoResponse criar(
+            ManutencaoRequest dto,
+            UUID empresaPublicId
+    ) {
+
+        Impressora impressora = impressoraRepository
+                .findByPublicIdAndEmpresaPublicId(
+                        dto.getImpressoraPublicId(),
+                        empresaPublicId
+                )
                 .orElseThrow(() -> new RuntimeException("Impressora não encontrada"));
 
         Manutencao m = new Manutencao();
+        m.setEmpresaPublicId(empresaPublicId);
         m.setImpressora(impressora);
         m.setTipo(dto.getTipo());
         m.setDescricao(dto.getDescricao());
@@ -49,17 +53,31 @@ public class ManutencaoService {
 
         repository.save(m);
 
+        return toResponse(m);
+    }
+
+    /* ================= DELETAR ================= */
+
+    public void deletar(UUID publicId, UUID empresaPublicId) {
+
+        Manutencao m = repository
+                .findByPublicIdAndEmpresaPublicId(publicId, empresaPublicId)
+                .orElseThrow(() -> new RuntimeException("Manutenção não encontrada"));
+
+        repository.delete(m);
+    }
+
+    /* ================= MAPPER ================= */
+
+    private ManutencaoResponse toResponse(Manutencao m) {
+
         return new ManutencaoResponse(
-                m.getId(),
-                impressora.getNome(),
+                m.getPublicId(),
+                m.getImpressora().getNome(),
                 m.getTipo(),
                 m.getDescricao(),
                 m.getCusto(),
                 m.getData()
         );
-    }
-
-    public void deletar(UUID id) {
-        repository.deleteById(id);
     }
 }

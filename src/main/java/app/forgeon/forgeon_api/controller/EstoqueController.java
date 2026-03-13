@@ -22,6 +22,16 @@ public class EstoqueController {
     private final EstoqueService estoqueService;
     private final ProdutoService produtoService;
 
+    @GetMapping
+    public ResponseEntity<List<EstoqueListaDTO>> listar() {
+
+        AuthContext auth = AuthContextHolder.get();
+
+        return ResponseEntity.ok(
+                estoqueService.listar(auth.getEmpresaPublicId())
+        );
+    }
+
     @PostMapping("/entrada")
     public ResponseEntity<Void> entrada(
             @RequestBody @Valid EntradaEstoqueRequestDTO request

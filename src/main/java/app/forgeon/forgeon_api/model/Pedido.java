@@ -1,6 +1,7 @@
 package app.forgeon.forgeon_api.model;
 
 import app.forgeon.forgeon_api.enums.StatusPedido;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -56,5 +57,6 @@ public class Pedido {
 
 
     @OneToMany(mappedBy = "pedido", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<ItemPedido> itens = new ArrayList<>();
 }

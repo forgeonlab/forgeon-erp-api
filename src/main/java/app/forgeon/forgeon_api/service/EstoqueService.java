@@ -1,6 +1,7 @@
 package app.forgeon.forgeon_api.service;
 
 import app.forgeon.forgeon_api.dto.estoque.EstoqueDashboardDTO;
+import app.forgeon.forgeon_api.dto.estoque.EstoqueListaDTO;
 import app.forgeon.forgeon_api.dto.estoque.EstoqueResponseDTO;
 import app.forgeon.forgeon_api.dto.estoque.MovimentacaoEstoqueResponseDTO;
 import app.forgeon.forgeon_api.enums.TipoMovimentacaoEstoque;
@@ -22,6 +23,11 @@ public class EstoqueService {
 
     private final EstoqueRepository estoqueRepository;
     private final MovimentacaoEstoqueRepository movimentacaoRepository;
+
+    @Transactional(readOnly = true)
+    public List<EstoqueListaDTO> listar(UUID empresaPublicId) {
+        return estoqueRepository.listar(empresaPublicId);
+    }
 
     @Transactional
     public void entrada(

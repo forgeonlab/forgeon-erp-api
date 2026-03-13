@@ -18,6 +18,12 @@ public class Manutencao {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    @Column(name = "public_id", nullable = false, unique = true)
+    private UUID publicId = UUID.randomUUID();
+
+    @Column(name = "empresa_public_id", nullable = false)
+    private UUID empresaPublicId;
+
     @ManyToOne
     @JoinColumn(name = "impressora_id", nullable = false)
     private Impressora impressora;

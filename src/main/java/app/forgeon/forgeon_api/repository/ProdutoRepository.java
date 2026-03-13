@@ -8,9 +8,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ProdutoRepository extends JpaRepository<Produto, UUID> {
+
     boolean existsByEmpresaPublicIdAndSku(UUID empresaPublicId, String sku);
 
     Optional<Produto> findByPublicId(UUID publicId);
+
+    Optional<Produto> findByPublicIdAndEmpresaPublicId(
+            UUID publicId,
+            UUID empresaPublicId
+    );
 
     List<Produto> findAllByEmpresaPublicId(UUID empresaPublicId);
 }

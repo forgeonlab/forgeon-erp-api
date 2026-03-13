@@ -1,4 +1,4 @@
-package app.forgeon.forgeon_api.dto.ordemproducao;
+package app.forgeon.forgeon_api.dto.producao;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -9,5 +9,7 @@ public record OrdemProducaoFilaDTO(
         String produtoNome,
         Integer quantidade,
         String status,
-        LocalDateTime criadoEm
+        LocalDateTime criadoEm,
+        LocalDateTime iniciadoEm,
+        LocalDateTime finalizadoEm
 ) {}

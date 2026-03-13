@@ -1,6 +1,7 @@
 package app.forgeon.forgeon_api.exception.handler;
 
 import app.forgeon.forgeon_api.dto.error.ApiErrorDTO;
+import app.forgeon.forgeon_api.exception.FilamentoNaoEncontradoException;
 import app.forgeon.forgeon_api.exception.PedidoStatusInvalidoException;
 import app.forgeon.forgeon_api.exception.ProdutoNaoEncontradoException;
 import app.forgeon.forgeon_api.exception.SkuDuplicadoException;
@@ -34,6 +35,17 @@ public class GlobalExceptionHandler {
                 .body(new ApiErrorDTO(
                         HttpStatus.NOT_FOUND.value(),
                         "PRODUTO_NAO_ENCONTRADO",
+                        ex.getMessage(),
+                        LocalDateTime.now()
+                ));
+    }
+
+    @ExceptionHandler(FilamentoNaoEncontradoException.class)
+    public ResponseEntity<ApiErrorDTO> handleFilamentoNaoEncontrado(FilamentoNaoEncontradoException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ApiErrorDTO(
+                        HttpStatus.NOT_FOUND.value(),
+                        "FILAMENTO_NAO_ENCONTRADO",
                         ex.getMessage(),
                         LocalDateTime.now()
                 ));
@@ -75,6 +87,17 @@ public class GlobalExceptionHandler {
                         HttpStatus.METHOD_NOT_ALLOWED.value(),
                         "METODO_NAO_SUPORTADO",
                         "Metodo nao suportado",
+                        LocalDateTime.now()
+                ));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorDTO> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ApiErrorDTO(
+                        HttpStatus.BAD_REQUEST.value(),
+                        "REQUISICAO_INVALIDA",
+                        ex.getMessage(),
                         LocalDateTime.now()
                 ));
     }

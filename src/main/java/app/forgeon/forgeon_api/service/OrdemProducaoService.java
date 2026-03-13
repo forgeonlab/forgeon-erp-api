@@ -1,5 +1,6 @@
 package app.forgeon.forgeon_api.service;
 
+import app.forgeon.forgeon_api.dto.producao.OrdemProducaoFilaDTO;
 import app.forgeon.forgeon_api.enums.StatusOrdemProducao;
 import app.forgeon.forgeon_api.enums.StatusPedido;
 import app.forgeon.forgeon_api.model.OrdemProducao;
@@ -82,8 +83,23 @@ public class OrdemProducaoService {
 
     // 📋 Listar fila
     @Transactional(readOnly = true)
-    public List<OrdemProducao> listarFila(UUID empresaPublicId) {
-        return ordemRepository.findAllByEmpresaPublicId(empresaPublicId);
+    public List<OrdemProducaoFilaDTO> listarFila(UUID empresaPublicId) {
+
+        return ordemRepository.findAllByEmpresaPublicId(empresaPublicId)
+                .stream()
+                .flatMap(ordem -> ordem.getPedido().getItens().stream()
+                        .map(item -> new OrdemProducaoFilaDTO(
+                                ordem.getId(),
+                                ordem.getPedido().getPublicId(),
+                                item.getProduto().getNome(),
+                                item.getQuantidade(),
+                                ordem.getStatus().name(),
+                                ordem.getPedido().getCriadoEm(),
+                                ordem.getIniciadoEm(),
+                                ordem.getFinalizadoEm()
+                        ))
+                )
+                .toList();
     }
 
     // 🔍 Helper
