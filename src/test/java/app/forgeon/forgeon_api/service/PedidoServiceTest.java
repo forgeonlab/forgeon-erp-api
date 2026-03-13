@@ -32,12 +32,14 @@ class PedidoServiceTest {
         EstoqueService estoqueService = Mockito.mock(EstoqueService.class);
         PedidoRepository pedidoRepository = Mockito.mock(PedidoRepository.class);
         CupomRepository cupomRepository = Mockito.mock(CupomRepository.class);
+        OrdemProducaoService ordemProducaoService = Mockito.mock(OrdemProducaoService.class);
 
         PedidoService service = new PedidoService(
                 produtoService,
                 estoqueService,
                 pedidoRepository,
-                cupomRepository
+                cupomRepository,
+                ordemProducaoService
         );
 
         UUID empresaId = UUID.randomUUID();
@@ -76,12 +78,14 @@ class PedidoServiceTest {
         EstoqueService estoqueService = Mockito.mock(EstoqueService.class);
         PedidoRepository pedidoRepository = Mockito.mock(PedidoRepository.class);
         CupomRepository cupomRepository = Mockito.mock(CupomRepository.class);
+        OrdemProducaoService ordemProducaoService = Mockito.mock(OrdemProducaoService.class);
 
         PedidoService service = new PedidoService(
                 produtoService,
                 estoqueService,
                 pedidoRepository,
-                cupomRepository
+                cupomRepository,
+                ordemProducaoService
         );
 
         UUID empresaId = UUID.randomUUID();
