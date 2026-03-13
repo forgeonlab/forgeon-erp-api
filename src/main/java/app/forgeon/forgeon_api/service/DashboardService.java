@@ -153,13 +153,25 @@ public class DashboardService {
         if (value == null) {
             return 0.0;
         }
+        if (value instanceof Object[] values) {
+            for (Object item : values) {
+                if (item != null) {
+                    return toDouble(item);
+                }
+            }
+            return 0.0;
+        }
         if (value instanceof BigDecimal bigDecimal) {
             return bigDecimal.doubleValue();
         }
         if (value instanceof Number number) {
             return number.doubleValue();
         }
-        return Double.parseDouble(String.valueOf(value));
+        String text = String.valueOf(value).trim();
+        if (text.isEmpty()) {
+            return 0.0;
+        }
+        return Double.parseDouble(text);
     }
 
     private double round(double value, int scale) {
