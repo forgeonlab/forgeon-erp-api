@@ -202,8 +202,8 @@ public interface DashboardRepository extends JpaRepository<Dashboard, UUID> {
 
     default Double eficienciaMedia(UUID empresaPublicId) {
         Object[] resumo = resumoEficiencia(empresaPublicId, StatusProducao.FINALIZADA);
-        double quantidadeBoa = toDouble(resumo[0]);
-        double quantidadePlanejada = toDouble(resumo[1]);
+        double quantidadeBoa = getArrayValueAsDouble(resumo, 0);
+        double quantidadePlanejada = getArrayValueAsDouble(resumo, 1);
         if (quantidadePlanejada <= 0) {
             return 0.0;
         }
@@ -218,6 +218,13 @@ public interface DashboardRepository extends JpaRepository<Dashboard, UUID> {
             return 0.0;
         }
         return round((pesoPerdido / base) * 100.0, 2);
+    }
+
+    private static double getArrayValueAsDouble(Object[] values, int index) {
+        if (values == null || index >= values.length) {
+            return 0.0;
+        }
+        return toDouble(values[index]);
     }
 
     private static double toDouble(Object value) {

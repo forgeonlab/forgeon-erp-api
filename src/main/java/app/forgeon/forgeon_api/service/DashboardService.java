@@ -66,8 +66,8 @@ public class DashboardService {
         );
 
         Object[] eficiencia = repo.resumoEficiencia(empresaPublicId, StatusProducao.FINALIZADA);
-        double quantidadeBoa = toDouble(eficiencia[0]);
-        double quantidadePlanejada = toDouble(eficiencia[1]);
+        double quantidadeBoa = getArrayValueAsDouble(eficiencia, 0);
+        double quantidadePlanejada = getArrayValueAsDouble(eficiencia, 1);
         double eficienciaMedia = quantidadePlanejada > 0
                 ? round((quantidadeBoa / quantidadePlanejada) * 100.0, 1)
                 : 0.0;
@@ -147,6 +147,13 @@ public class DashboardService {
 
     private double defaultZero(Double value) {
         return value == null ? 0.0 : value;
+    }
+
+    private double getArrayValueAsDouble(Object[] values, int index) {
+        if (values == null || index >= values.length) {
+            return 0.0;
+        }
+        return toDouble(values[index]);
     }
 
     private double toDouble(Object value) {
