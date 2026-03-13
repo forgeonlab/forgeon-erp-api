@@ -6,6 +6,8 @@ import app.forgeon.forgeon_api.exception.PedidoStatusInvalidoException;
 import app.forgeon.forgeon_api.exception.ProdutoNaoEncontradoException;
 import app.forgeon.forgeon_api.exception.SkuDuplicadoException;
 import jakarta.validation.ConstraintViolationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,6 +19,8 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(SkuDuplicadoException.class)
     public ResponseEntity<ApiErrorDTO> handleSkuDuplicado(SkuDuplicadoException ex) {
@@ -93,6 +97,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ApiErrorDTO> handleIllegalArgument(IllegalArgumentException ex) {
+        log.warn("Requisicao invalida", ex);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ApiErrorDTO(
                         HttpStatus.BAD_REQUEST.value(),
@@ -104,6 +109,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorDTO> handleGeneric(Exception ex) {
+        log.error("Erro inesperado no servidor", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ApiErrorDTO(
                         HttpStatus.INTERNAL_SERVER_ERROR.value(),
